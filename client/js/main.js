@@ -4,9 +4,9 @@
 (function () {
 
     'use strict';
-    //jsx.file('./host/stinovac_18_09_2019.jsx');
+    jsx.file('./host/stinovac_decoupled.jsx');
 
-    var csInterface = new CSInterface();   
+    var csInterface = new CSInterface();
     var gExtensionId = "com.metlickaj.shadower";
 
     function Persistent(inOn) {

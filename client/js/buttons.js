@@ -20,5 +20,16 @@ $("#restartExt").click(function() {
     }
 });
 
-$("#openShadower").click(function() {jsx.file('./host/stinovac_18_09_2019.jsx')});
-    
+//$("#openShadower").click(function() {jsx.file('./host/stinovac_18_09_2019.jsx')});
+$("#openShadower").click(function() {jsx.evalScript('loadStaticFilesFromExplorer()', addFiles)});
+
+
+function addFiles(red) {
+    var files = JSON.parse(red);
+    for(var i = 0; i < files.length; i++) {
+        alert(files[i]);
+    }
+    $.each(res, function() {
+        $("#filezz").append($("<option />").val(this).text(this));
+    })
+}

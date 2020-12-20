@@ -1,4 +1,5 @@
-﻿#include "./jachym-library.jsx"
+﻿//@include "./jachym-library.jsx"
+//@include "./json.jsx"
 
 var currentFolder;
 var folderNotSet = "není vybraná složka";
@@ -6,51 +7,6 @@ var Soubory_Sh = [];
 var Soubory_HP = [];
 var folderFile;
 var firstFile;
-
-var w = new Window("dialog", "Seskupování stínů", undefined, {
-    resizeable: true
-});
-w.alignChildren = "left";
-panel_ShadowFiles = w.add("panel", undefined, "Série fází pro stínování", {
-    borderStyle: 'white'
-});
-panel_ShadowFiles.alignChildren = "left";
-panel_ShadowFiles.alignment = ["fill", "fill"];
-list_ShadowFiles = panel_ShadowFiles.add("listbox", undefined, []);
-list_ShadowFiles.alignment = ["fill", "fill"];
-list_ShadowFiles.minimumSize = [250, 250];
-group_LoadShadow = w.add("group", undefined);
-group_LoadShadow.alignment = ["fill", "bottom"];
-
-bt_LoadShadowFilesBridge = group_LoadShadow.add("button", undefined, "Načti fáze z Bridge");
-bt_LoadShadowFilesBridge.alignment = ["fill", "bottom"];
-statictext = group_LoadShadow.add("statictext", undefined, "nebo");
-statictext.alignment = ["fill", "bottom"];
-bt_LoadShadowFiles = group_LoadShadow.add("button", undefined, "Vyber fáze ručně...");
-bt_LoadShadowFiles.alignment = ["fill", "bottom"];
-
-panel_StaticFiles = w.add("panel", undefined, "Statické helper fáze", {
-    borderStyle: 'white'
-})
-panel_StaticFiles.alignChildren = "left";
-panel_StaticFiles.alignment = ["fill", "bottom"];
-list_StaticFiles = panel_StaticFiles.add("listbox", undefined, []);
-list_StaticFiles.alignment = ["fill", "bottom"];
-list_StaticFiles.minimumSize = [250, 100];
-group_LoadHelper = w.add("group", undefined);
-group_LoadHelper.alignment = ["fill", "bottom"];
-
-bt_LoadStaticFilesBridge = group_LoadHelper.add("button", undefined, "Načti fáze z Bridge");
-group_LoadHelper.add("statictext", undefined, "nebo");
-bt_LoadStaticFiles = group_LoadHelper.add("button", undefined, "Vyber fáze ručně...");
-
-group_LoadAndSave = w.add("group", undefined);
-group_LoadAndSave.alignment = ["fill", "bottom"];
-bt_zapsatDoPSDs = group_LoadAndSave.add("button", undefined, "Zapsat do .PSDs");
-bt_zapsatDoPSDs.alignment = ["fill", "bottom"];
-bt_zapsatDoPSDs.enabled = true;
-statictext_CurrentFolder = w.add("statictext", undefined, folderNotSet);
-statictext_CurrentFolder.alignment = ["fill", "bottom"];
 
 function filterpsd(inputList) {
     var inputList_nonfiltered = [];
@@ -97,7 +53,7 @@ bt_LoadShadowFiles.onClick = function() {
     statictext_CurrentFolder.text = currentFolder;
 }
 
-bt_LoadShadowFilesBridge.onClick = function() {
+loadShadowFilesFromBridge = function() {
     Soubory_Sh = filterpsd(GetFilesFromBridge());
     ClearList(list_ShadowFiles);
     if (Soubory_Sh.length > 0) {
@@ -110,14 +66,13 @@ bt_LoadShadowFilesBridge.onClick = function() {
     statictext_CurrentFolder.text = currentFolder;
 }
 
-bt_LoadStaticFiles.onClick = function() {
+function loadStaticFilesFromExplorer() {
     Soubory_HP = filterpsd(openDialog());
-    ClearList(list_StaticFiles);
     Soubory_HP = Depath(Soubory_HP);
-    FillList(Soubory_HP, list_StaticFiles);
+    return JSON.lave(Soubory_HP);
 }
 
-bt_LoadStaticFilesBridge.onClick = function() {
+loadStaticFilesFromBridge = function() {
     Soubory_HP = filterpsd(GetFilesFromBridge());
     ClearList(list_StaticFiles);
     Soubory_HP = Depath(Soubory_HP);
@@ -161,32 +116,4 @@ bt_zapsatDoPSDs.onClick = function() {
         docRef.close(SaveOptions.SAVECHANGES);
     }
     app.togglePalettes();
-    w.close();
 }
-function ClearList(targetListBox) { //Funkce pro vyčištění listboxu - odzadu postupně odebere všechny položky
-    var list = targetListBox;
-    var u = targetListBox.items.length;
-    for (i = u - 1; i >= 0; i--) {
-        list.remove(list.items[i])
-    }
-}
-
-function FillList(fileArry, targetListBox) { //Funkce pro naplnění listboxu - odzadu postupně odebere všechny položky
-    var list = targetListBox;
-    var u = fileArry.length;
-
-    for (i = 0; i < u; i++) {
-
-        list.add("item", fileArry[i]);
-    };
-};
-
-w.onResizing = w.onResize = function() {
-    this.layout.resize();
-}
-
-w.onShow = function() {
-    w.minimumSize = w.size;
-}
-
-w.show();
