@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<ExtensionManifest Version="4.0" ExtensionBundleId="com.metlickaj.shadower" ExtensionBundleVersion="1.0.0"
+		ExtensionBundleName="Shadower" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<ExtensionList>
+		<Extension Id="com.metlickaj.shadower" Version="1.0" />
+	</ExtensionList>
+	<ExecutionEnvironment>
+		<HostList>
+            <Host Name="PHXS" Version="14" /><Host Name="PHSP" Version="14" />
+		</HostList>
+		<LocaleList>
+			<Locale Code="All" />
+		</LocaleList>
+		<RequiredRuntimeList>
+			<RequiredRuntime Name="CSXS" Version="4.0" />
+		</RequiredRuntimeList>
+	</ExecutionEnvironment>
+	<DispatchInfoList>
+		<Extension Id="com.metlickaj.shadower">;
+			<DispatchInfo >
+				<Resources>
+				<MainPath>./client/index.html</MainPath>
+				<!--ScriptPath>./host/hostscript.jsx</ScriptPath-->
+				</Resources>
+				<Lifecycle>
+					<AutoVisible>true</AutoVisible>
+				</Lifecycle>
+				<UI>
+					<Type>Panel</Type>
+					<Menu>Shadower</Menu>
+					<Geometry>
+						<Size>
+							<Height>700</Height>
+							<Width>300</Width>							
+						</Size>
+						<!-- <MaxSize>
+							<Height></Height>
+							<Width></Width>
+						</MaxSize>
+						<MinSize>
+							<Height></Height>
+							<Width></Width>
+						</MinSize> -->						
+					</Geometry>
+				</UI>
+			</DispatchInfo>
+		</Extension>
+	</DispatchInfoList>
+</ExtensionManifest>
