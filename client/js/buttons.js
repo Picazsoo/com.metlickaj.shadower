@@ -20,16 +20,16 @@ $("#restartExt").click(function() {
     }
 });
 
-//$("#openShadower").click(function() {jsx.file('./host/stinovac_18_09_2019.jsx')});
-$("#openShadower").click(function() {jsx.evalScript('loadStaticFilesFromExplorer()', addFiles)});
+$("#openShadower").on("click" ,function() {jsx.evalScript("loadFiles('explorer')", addFiles)});
+$("#filezz").on("change",function() {jsx.evalScript(`openFile("${$("#filezz").children("option:selected").val()}")`)});
+//$("#filezz").on("change",function() {alert($("#filezz").children("option:selected").val())});
 
 
 function addFiles(red) {
     var files = JSON.parse(red);
+    $("#filezz").empty();
     for(var i = 0; i < files.length; i++) {
-        alert(files[i]);
+        //alert(`<option value="${files[i]}">${files[i]}</option>`);
+        $("#filezz").append(`<option value="${files[i].path}">${files[i].fileName}</option>`);
     }
-    $.each(res, function() {
-        $("#filezz").append($("<option />").val(this).text(this));
-    })
 }
