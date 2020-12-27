@@ -1,4 +1,4 @@
-﻿#include "./jachym-library.jsx"
+﻿//@include "./jachym-library.jsx"
 
 var currentFolder;
 var folderNotSet = "není vybraná složka";

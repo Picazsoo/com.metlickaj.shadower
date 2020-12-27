@@ -20,16 +20,10 @@ $("#restartExt").click(function() {
     }
 });
 
-$("#openShadower").on("click" ,function() {jsx.evalScript("loadFiles('explorer')", addFiles)});
-$("#filezz").on("change",function() {jsx.evalScript(`openFile("${$("#filezz").children("option:selected").val()}")`)});
-//$("#filezz").on("change",function() {alert($("#filezz").children("option:selected").val())});
+$("#openShadower").on("click" , () => jsx.evalScript("loadFiles('explorer')", addFiles));
+//$("#openShadower").on("click" , () => jsx.file("./host/stinovac_18_09_2019.jsx"));
 
+$("#previous-phase").on("click", () => jsx.file("./host/cibule-posun_vzad.jsx"));
+$("#next-phase").on("click", () => jsx.file("./host/cibule-posun_vpred.jsx"));
 
-function addFiles(red) {
-    var files = JSON.parse(red);
-    $("#filezz").empty();
-    for(var i = 0; i < files.length; i++) {
-        //alert(`<option value="${files[i]}">${files[i]}</option>`);
-        $("#filezz").append(`<option value="${files[i].path}">${files[i].fileName}</option>`);
-    }
-}
+$("#filezz").on("dblclick",() => jsx.evalScript(`openFile("${$("#filezz").children("option:selected").val()}")`));

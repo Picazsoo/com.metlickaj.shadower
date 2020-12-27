@@ -50,6 +50,14 @@ sTID = function(s) { return app.stringIDToTypeID(s); };
     executeAction(cTID(LyrVis), desc1, DialogModes.NO);
   };
 
+  function hideLayer(layername) {
+    LayerVisibility(layerName, false);
+  };
+
+  function showLayer(layername) {
+    LayerVisibility(layerName, true);
+  };
+
   // Set
   function SelectAllPixels() {
     var desc1 = new ActionDescriptor();

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <link id="hostStyle" rel="stylesheet" href="css/theme.css"/>
 <link id="theme" rel="stylesheet" href="css/light.css"/>
-<title>TEST</title>
+<title></title>
 </head>
 <body>
     
@@ -15,12 +15,22 @@
             <div class="topcoat-switch__toggle"></div>
         </label>
         <hr>
+        <div class="topcoat-button-bar">
+            <div class="topcoat-button-bar__item">
+              <button id="previous-phase" class="topcoat-button-bar__button--large">&#9664; Předchozí</button>
+            </div>
+            <div class="topcoat-button-bar__item">
+              <button id="next-phase" class="topcoat-button-bar__button--large">Další &#9654;</button>
+            </div>
+          </div>
+        <hr>
         <div class="flex-container">
             <button id="openShadower" class="topcoat-button">Otevri cibulak</button>
+            <button id="filesFromCurrent" class="topcoat-button">Načti další fáze</button>
             <select id="filezz" style="width: 80%;" multiple size="10"></select>
         </div>
         <hr>
-        <div id="smrdis">
+        <div id="working-folder">
             nic
         </div>
         <hr>
