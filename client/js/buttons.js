@@ -26,4 +26,8 @@ $("#openShadower").on("click" , () => jsx.evalScript("loadFiles('explorer')", ad
 $("#previous-phase").on("click", () => jsx.file("./host/cibule-posun_vzad.jsx"));
 $("#next-phase").on("click", () => jsx.file("./host/cibule-posun_vpred.jsx"));
 
-$("#filezz").on("dblclick",() => jsx.evalScript(`openFile("${$("#filezz").children("option:selected").val()}")`));
+$("#clear-cache").on("click", () => clearCache());
+
+$("#load-image").on("click", () => importImage());
+
+$sheets.on("dblclick",() => jsx.evalScript(`openFile("${$sheets.children("option:selected").val()}")`));

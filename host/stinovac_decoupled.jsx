@@ -60,3 +60,8 @@ function loadFiles(source) {
 function openFile(path) {
     open(File(path));
 }
+
+function openDocument(location){
+  var fileRef = new File(location);
+  var docRef = app.open(fileRef);
+}

@@ -1,67 +1,73 @@
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, regexp: true, indent: 4, maxerr: 50 */
 /*global $, window, location, CSInterface, SystemPath, themeManager*/
 
-(function () {
+'use strict';
+jsx.file('./host/stinovac_decoupled.jsx');
 
-    'use strict';
-    jsx.file('./host/stinovac_decoupled.jsx');
+var csInterface = new CSInterface();
+var gExtensionId = "com.metlickaj.shadower";
 
-    var csInterface = new CSInterface();
-    var gExtensionId = "com.metlickaj.shadower";
+csInterface.addEventListener("documentAfterActivate", tryPopulateListBox);
 
-    function Persistent(inOn) {
+themeManager.init();
 
-        if (inOn){
-            var event = new CSEvent("com.adobe.PhotoshopPersistent", "APPLICATION");
-        } else {
-            var event = new CSEvent("com.adobe.PhotoshopUnPersistent", "APPLICATION");
-        }
-        event.extensionId = gExtensionId;
-        csInterface.dispatchEvent(event);
+$('#persistenceSwitch').on('change', function() {
+    Persistent( $(this).is(':checked') );
+});
+
+function Persistent(inOn) {
+
+    if (inOn){
+        var event = new CSEvent("com.adobe.PhotoshopPersistent", "APPLICATION");
+    } else {
+        var event = new CSEvent("com.adobe.PhotoshopUnPersistent", "APPLICATION");
     }
+    event.extensionId = gExtensionId;
+    csInterface.dispatchEvent(event);
+}
 
-    csInterface.addEventListener("documentAfterActivate", tryPopulateListBox);
+const $sheets = $("#sheets");
+const $sheetFolder = $('#working-folder');
 
-    function init() {
-        
-        themeManager.init();
-
-        $('#persistenceSwitch').change(function() {
-            Persistent( $(this).is(':checked') );
-        });
+(function() {
+    let persistedSheets = localStorage.getItem('persistedSheets');
+    let workingFolder = localStorage.getItem('workingFolder');
+    if(persistedSheets && workingFolder) {
+        populateSheetBox(JSON.parse(persistedSheets), JSON.parse(workingFolder));
+    } else {
+        //
     }
-        
-    init();
-
-}());
+})();
 
 function tryPopulateListBox(event) {
     let filePath = extractPathFromEvent(event);
     let directoryPath = filePath.substring(0, filePath.lastIndexOf("/"));
-
-    //alert(path);
-    //alert(directoryPath);
-    //pokud je seznam prazdny, pokusit se ho naplnit ostatnimi fazemi z adresare.
-    if($("#filezz").children().length == 0) {
+    // Try to fill the sheets list if empty.
+    if($sheets.children().length == 0) {
         let files = window.cep.fs.readdir(directoryPath);
         if (files.err) {
-            // Panic and handle the error
-            alert("this does not work");
+            // do nothing.
         } else {
             // Array of the files (without path)
             fileNames = files.data;
             let filteredFileNames = filterFileNames(fileNames);
             filteredFileNames.sort();
-            filteredFileNames.forEach(fileName => {
-                //value je cela cesta k souboru
-                $("#filezz").append(`<option value="${directoryPath + "/" + fileName}">${fileName}</option>\n`);
-            });
-            $('#working-folder').html(`<a id="link-to-working-folder" href="#" onclick="openFolder('${directoryPath}');return false">${directoryPath}</a>`);
-            $("#filezz").val(filePath).scrollIntoView();
+            localStorage.setItem('persistedSheets', JSON.stringify(filteredFileNames));
+            localStorage.setItem('workingFolder', JSON.stringify(directoryPath));
+            populateSheetBox(filteredFileNames, directoryPath);
+            $sheets.val(filePath).get(0).scrollIntoView();
         }
     } else {
-        $("#filezz").val(filePath).scrollIntoView();
+        $sheets.val(filePath).get(0).scrollIntoView();
     }
+}
+
+function populateSheetBox(fileNames, folder) {
+    fileNames.forEach(fileName => {
+        //Populate select list. Set value to be the entire path to the sheet.
+        $sheets.append(`<option value="${folder + "/" + fileName}">${fileName}</option>\n`);
+    });
+    $sheetFolder.html(`<a id="link-to-working-folder" href="#" onclick="openFolder('${folder}');return false">${folder}</a>`);
 }
 
 function openFolder(dir) {
@@ -93,9 +99,23 @@ function filterFileNames(fileNames) {
 
 function addFiles(red) {
     var files = JSON.parse(red);
-    $("#filezz").empty();
+    $sheets.empty();
     for(var i = 0; i < files.length; i++) {
         //alert(`<option value="${files[i]}">${files[i]}</option>`);
-        $("#filezz").append(`<option value="${files[i].path}">${files[i].fileName}</option>`);
+        $sheets.append(`<option value="${files[i].path}">${files[i].fileName}</option>`);
     }
+}
+
+function clearCache() {
+    localStorage.removeItem('persistedSheets');
+    localStorage.removeItem('workingFolder');
+}
+
+function importImage() {
+    //cep_node.process.pippo = "doge";
+    logToConsole();
+}
+
+function logToConsole() {
+    console.log(cep_node);
 }
