@@ -3,13 +3,44 @@
 
 'use strict';
 jsx.file('./host/stinovac_decoupled.jsx');
+//theme manager to switch between dark mode and light mode
+themeManager.init();
 
-var csInterface = new CSInterface();
+//node.js imports
+const fs = require('fs');
+
+const csInterface = new CSInterface();
+const path = csInterface.getSystemPath(SystemPath.EXTENSION);
+console.log("the path is " + path);
 var gExtensionId = "com.metlickaj.shadower";
 
-csInterface.addEventListener("documentAfterActivate", tryPopulateListBox);
+//initialize horizontally scrolling thumbnail list
+const $frame  = $('#frame');
+const $wrap   = $frame.parent();
+const $slides = $('#slides');
+const sly = new Sly('#frame', {
+        horizontal: 1,
+        itemNav: 'basic',
+        smart: 1,
+        activateMiddle: 0,
+        activateOn: 'click',
+        mouseDragging: 1,
+        touchDragging: 1,
+        releaseSwing: 1,
+        scrollBy: 1,
+        scrollBar: $wrap.find('.scrollbar'),
+        speed: 300,
+        elasticBounds: 0,
+        easing: 'swing',
+        dragHandle: 1,
+        dynamicHandle: 1,
+        clickBar: 1,
+        startAt: 0
+});
+sly.init();
 
-themeManager.init();
+//Check if previous shadowing session exists.
+csInterface.addEventListener("documentAfterActivate", tryPopulateListBox);
 
 $('#persistenceSwitch').on('change', function() {
     Persistent( $(this).is(':checked') );
@@ -26,7 +57,6 @@ function Persistent(inOn) {
     csInterface.dispatchEvent(event);
 }
 
-const $sheets = $("#sheets");
 const $sheetFolder = $('#working-folder');
 
 (function() {
@@ -43,30 +73,48 @@ function tryPopulateListBox(event) {
     let filePath = extractPathFromEvent(event);
     let directoryPath = filePath.substring(0, filePath.lastIndexOf("/"));
     // Try to fill the sheets list if empty.
-    if($sheets.children().length == 0) {
-        let files = window.cep.fs.readdir(directoryPath);
-        if (files.err) {
-            // do nothing.
-        } else {
-            // Array of the files (without path)
-            fileNames = files.data;
-            let filteredFileNames = filterFileNames(fileNames);
-            filteredFileNames.sort();
-            localStorage.setItem('persistedSheets', JSON.stringify(filteredFileNames));
-            localStorage.setItem('workingFolder', JSON.stringify(directoryPath));
-            populateSheetBox(filteredFileNames, directoryPath);
-            $sheets.val(filePath).get(0).scrollIntoView();
-        }
+    if($slides.children().length != 0) {
+        return;
+    }
+    let files = window.cep.fs.readdir(directoryPath);
+    if (files.err) {
+        // do nothing.
     } else {
-        $sheets.val(filePath).get(0).scrollIntoView();
+        // Array of the files (without path)
+        let fileNames = files.data;
+        let filteredFileNames = filterFileNames(fileNames);
+        filteredFileNames.sort();
+        localStorage.setItem('persistedSheets', JSON.stringify(filteredFileNames));
+        localStorage.setItem('workingFolder', JSON.stringify(directoryPath));
+        populateSheetBox(filteredFileNames, directoryPath);
     }
 }
 
 function populateSheetBox(fileNames, folder) {
+    //empty both
+    $slides.html("");
     fileNames.forEach(fileName => {
-        //Populate select list. Set value to be the entire path to the sheet.
-        $sheets.append(`<option value="${folder + "/" + fileName}">${fileName}</option>\n`);
+        //Populate thumbnails.
+        $(
+            `<li>
+                <div class="slideframe">
+                    <div class="imageholder">
+                        <img>
+                    </div>
+                    <div class="filename">
+                        ${fileName}
+                    </div>
+                </div>
+            </li>`
+            ).attr({
+                id: withoutExtension(fileName),
+                title: fileName,
+            })
+            .data("folder", folder)
+            .data("fileName", fileName)
+            .appendTo($slides);
     });
+    sly.reload();
     $sheetFolder.html(`<a id="link-to-working-folder" href="#" onclick="openFolder('${folder}');return false">${folder}</a>`);
 }
 
@@ -87,6 +135,10 @@ function windoizePath(forwardSlashPath) {
     return newPath;
 }
 
+function withoutExtension(fileName) {
+    return fileName.substring(0, fileName.toUpperCase().lastIndexOf(".PSD"));
+}
+
 function filterFileNames(fileNames) {
     let filteredFileNames = [];
     fileNames.forEach(element => {
@@ -97,25 +149,24 @@ function filterFileNames(fileNames) {
     return filteredFileNames;
 }
 
-function addFiles(red) {
-    var files = JSON.parse(red);
-    $sheets.empty();
-    for(var i = 0; i < files.length; i++) {
-        //alert(`<option value="${files[i]}">${files[i]}</option>`);
-        $sheets.append(`<option value="${files[i].path}">${files[i].fileName}</option>`);
-    }
-}
-
 function clearCache() {
     localStorage.removeItem('persistedSheets');
     localStorage.removeItem('workingFolder');
 }
 
 function importImage() {
-    //cep_node.process.pippo = "doge";
-    logToConsole();
-}
-
-function logToConsole() {
-    console.log(cep_node);
+    $slides.find("li").each(function() {
+        let $this = $(this);
+        let obj = {
+            folder: $this.data("folder"),
+            fileName: $this.data("fileName"),
+            width: 250,
+            targetSubfolder: ".shadow"
+        };
+        console.log(obj);
+        jsx.evalScript('getPngThumbnail(' + JSON.stringify(obj) + ')', (returnObj) => {
+            let pngPath = JSON.parse(returnObj).thumbnailPath;
+            $this.find("img").attr("src", "file://" + pngPath);
+        });
+    })
 }

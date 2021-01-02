@@ -56,9 +56,34 @@ function loadFiles(source) {
     return JSON.lave(filesWithPaths);
 }
 
+function getPngThumbnail(paramObj) {
+    var psdFolder = paramObj.folder;
+    var psdFileName = paramObj.fileName;
+    var psdFilePath = psdFolder + "/" + psdFileName;
+    var subFolder = paramObj.targetSubfolder;
+    var pngFilePath = psdFolder + "/" + subFolder + "/" + psdFileName.substring(0, psdFileName.toUpperCase().lastIndexOf(".PSD"));
+    var width = paramObj.width;
+
+    // alert(folder);
+    // alert(fileName);
+    // alert(subFolder);
+    openFile(psdFilePath);
+    resizeToWidth(width);
+    createFolderIfNotExist(psdFolder + "/" + subFolder);
+    savePngThumbnail(pngFilePath);
+    app.activeDocument.close(SaveOptions.DONOTSAVECHANGES);
+    return JSON.lave({thumbnailPath: pngFilePath + ".png"});
+}
 
 function openFile(path) {
     open(File(path));
+}
+
+function createFolderIfNotExist(path) {
+    var f = new Folder(path);
+    if ( ! f.exists ) {
+        f.create()
+    }
 }
 
 function openDocument(location){

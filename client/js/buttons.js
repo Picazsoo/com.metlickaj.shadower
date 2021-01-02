@@ -30,4 +30,11 @@ $("#clear-cache").on("click", () => clearCache());
 
 $("#load-image").on("click", () => importImage());
 
-$sheets.on("dblclick",() => jsx.evalScript(`openFile("${$sheets.children("option:selected").val()}")`));
+$(window).on("resize", () => sly.reload());
+
+$slides.on("dblclick",() => jsx.evalScript(`openFile("${getPSDFilePathFromSlide()}")`));
+
+function getPSDFilePathFromSlide() {
+    $activeSlide = $slides.find(".active");
+    return $activeSlide.data("folder") + "/" + $activeSlide.data("fileName");
+}
