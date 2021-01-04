@@ -9,10 +9,13 @@ themeManager.init();
 //node.js imports
 const fs = require('fs');
 
+//cs interface used for communication with photoshop
 const csInterface = new CSInterface();
 const path = csInterface.getSystemPath(SystemPath.EXTENSION);
 console.log("the path is " + path);
-var gExtensionId = "com.metlickaj.shadower";
+
+//current folder in which we work
+let currentWorkingFolder;
 
 //initialize horizontally scrolling thumbnail list
 const $frame  = $('#frame');
@@ -40,43 +43,46 @@ const sly = new Sly('#frame', {
 sly.init();
 
 //Check if previous shadowing session exists.
-csInterface.addEventListener("documentAfterActivate", tryPopulateListBox);
+csInterface.addEventListener("documentAfterActivate", tryPopulateSlides);
 
 $('#persistenceSwitch').on('change', function() {
     Persistent( $(this).is(':checked') );
 });
 
 function Persistent(inOn) {
-
     if (inOn){
-        var event = new CSEvent("com.adobe.PhotoshopPersistent", "APPLICATION");
+        let event = new CSEvent("com.adobe.PhotoshopPersistent", "APPLICATION");
     } else {
-        var event = new CSEvent("com.adobe.PhotoshopUnPersistent", "APPLICATION");
+        let event = new CSEvent("com.adobe.PhotoshopUnPersistent", "APPLICATION");
     }
+    const gExtensionId = "com.metlickaj.shadower";
     event.extensionId = gExtensionId;
     csInterface.dispatchEvent(event);
 }
 
+//clickable folder link
 const $sheetFolder = $('#working-folder');
 
-(function() {
-    let persistedSheets = localStorage.getItem('persistedSheets');
-    let workingFolder = localStorage.getItem('workingFolder');
-    if(persistedSheets && workingFolder) {
-        populateSheetBox(JSON.parse(persistedSheets), JSON.parse(workingFolder));
-    } else {
-        //
-    }
-})();
+//This always runs after reload.
+// (function() {
+//     let persistedSheets = localStorage.getItem('persistedSheets');
+//     let workingFolder = localStorage.getItem('workingFolder');
+//     if(persistedSheets && workingFolder) {
+//         populateSlides(JSON.parse(persistedSheets), JSON.parse(workingFolder));
+//     } else {
+//         //
+//     }
+// })();
 
-function tryPopulateListBox(event) {
+function tryPopulateSlides(event) {
     let filePath = extractPathFromEvent(event);
-    let directoryPath = filePath.substring(0, filePath.lastIndexOf("/"));
-    // Try to fill the sheets list if empty.
+    currentWorkingFolder = filePath.substring(0, filePath.lastIndexOf("/"));
+    // Try to fill the slides if empty.
     if($slides.children().length != 0) {
         return;
     }
-    let files = window.cep.fs.readdir(directoryPath);
+    //extract files existing in the folder.
+    let files = window.cep.fs.readdir(currentWorkingFolder);
     if (files.err) {
         // do nothing.
     } else {
@@ -84,38 +90,70 @@ function tryPopulateListBox(event) {
         let fileNames = files.data;
         let filteredFileNames = filterFileNames(fileNames);
         filteredFileNames.sort();
-        localStorage.setItem('persistedSheets', JSON.stringify(filteredFileNames));
-        localStorage.setItem('workingFolder', JSON.stringify(directoryPath));
-        populateSheetBox(filteredFileNames, directoryPath);
+        //localStorage.setItem('persistedSheets', JSON.stringify(filteredFileNames));
+        localStorage.setItem('workingFolder', JSON.stringify(currentWorkingFolder));
+        populateSlides(filteredFileNames, currentWorkingFolder);
     }
 }
 
-function populateSheetBox(fileNames, folder) {
-    //empty both
-    $slides.html("");
-    fileNames.forEach(fileName => {
-        //Populate thumbnails.
-        $(
-            `<li>
-                <div class="slideframe">
-                    <div class="imageholder">
-                        <img>
+function storeWorkingEnvironment(pathToFolder) {
+    let storedEnvironmentsMap;
+    //if nothing is stored, create new map. Otherwise parse stored values.
+    if(localStorage.getItem('persistedSheets')) {
+        storedEnvironmentsMap = new Map(JSON.parse(localStorage.getItem('persistedSheets')));
+    } else {
+        storedEnvironmentsMap = new Map();
+    }
+    storedEnvironmentsMap.set(pathToFolder, $slides.get(0).innerHTML);
+    console.log($slides.get(0).innerHTML);
+    localStorage.setItem('persistedSheets', JSON.stringify(Array.from(storedEnvironmentsMap)));
+}
+
+function retrieveWorkingEnvironment(pathToFolder) {
+    console.log(pathToFolder);
+    let storedEnvironmentsMap;
+    if(localStorage.getItem('persistedSheets')) {
+        storedEnvironmentsMap = new Map(JSON.parse(localStorage.getItem('persistedSheets')));
+    } else {
+        storedEnvironmentsMap = new Map();
+    }
+    console.log("trying to retrieve");
+    return storedEnvironmentsMap.get(pathToFolder);
+}
+
+function populateSlides(fileNames, folder) {
+    //empty slides
+    $slides.empty();
+    let stored = retrieveWorkingEnvironment(folder);
+    if(stored) {
+        $slides.append(stored);
+        console.log("retrieved!!!");
+    } else {
+        fileNames.forEach(fileName => {
+            //Populate thumbnails.
+            $(
+                `<li>
+                    <div class="slideframe">
+                        <div class="imageholder">
+                            <img>
+                        </div>
+                        <div class="filename">
+                            ${fileName}
+                        </div>
                     </div>
-                    <div class="filename">
-                        ${fileName}
-                    </div>
-                </div>
-            </li>`
+                </li>`
             ).attr({
-                id: withoutExtension(fileName),
+                id: stripExtension(fileName),
                 title: fileName,
             })
-            .data("folder", folder)
-            .data("fileName", fileName)
+            .attr("folder", folder)
+            .attr("fileName", fileName)
             .appendTo($slides);
-    });
+        });
+    }
     sly.reload();
     $sheetFolder.html(`<a id="link-to-working-folder" href="#" onclick="openFolder('${folder}');return false">${folder}</a>`);
+    storeWorkingEnvironment(folder);
 }
 
 function openFolder(dir) {
@@ -135,8 +173,8 @@ function windoizePath(forwardSlashPath) {
     return newPath;
 }
 
-function withoutExtension(fileName) {
-    return fileName.substring(0, fileName.toUpperCase().lastIndexOf(".PSD"));
+function stripExtension(fileName) {
+    return fileName.substring(0, fileName.toUpperCase().lastIndexOf("."));
 }
 
 function filterFileNames(fileNames) {
@@ -154,19 +192,27 @@ function clearCache() {
     localStorage.removeItem('workingFolder');
 }
 
-function importImage() {
-    $slides.find("li").each(function() {
-        let $this = $(this);
+function createThumbnails() {
+    jsx.evalScript('hidePalettes()');
+    let numOfPictures = $slides.find("li").length;
+    //for each image create a new thumbnail.
+    $slides.find("li").each(function(index, element) {
+        let $this = $(element);
         let obj = {
-            folder: $this.data("folder"),
-            fileName: $this.data("fileName"),
+            folder: $this.attr("folder"),
+            fileName: $this.attr("fileName"),
             width: 250,
             targetSubfolder: ".shadow"
         };
-        console.log(obj);
-        jsx.evalScript('getPngThumbnail(' + JSON.stringify(obj) + ')', (returnObj) => {
-            let pngPath = JSON.parse(returnObj).thumbnailPath;
-            $this.find("img").attr("src", "file://" + pngPath);
+        jsx.evalScript('getJpgThumbnail(' + JSON.stringify(obj) + ')', (returnObj) => {
+            let filePath = JSON.parse(returnObj).thumbnailPath;
+            $this.find("img").attr("src", "file://" + filePath);
+            if(numOfPictures - 1 == index) {
+                console.log(currentWorkingFolder);
+                console.log("trying to store updated html");
+                storeWorkingEnvironment(currentWorkingFolder);
+                jsx.evalScript('showPalettes()');
+            }
         });
-    })
+    });
 }

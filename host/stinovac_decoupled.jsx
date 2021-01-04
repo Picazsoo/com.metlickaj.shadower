@@ -56,23 +56,27 @@ function loadFiles(source) {
     return JSON.lave(filesWithPaths);
 }
 
-function getPngThumbnail(paramObj) {
+function getJpgThumbnail(paramObj) {
     var psdFolder = paramObj.folder;
     var psdFileName = paramObj.fileName;
     var psdFilePath = psdFolder + "/" + psdFileName;
     var subFolder = paramObj.targetSubfolder;
-    var pngFilePath = psdFolder + "/" + subFolder + "/" + psdFileName.substring(0, psdFileName.toUpperCase().lastIndexOf(".PSD"));
+    var jpgFilePath = psdFolder + "/" + subFolder + "/" + psdFileName.substring(0, psdFileName.toUpperCase().lastIndexOf(".PSD"));
     var width = paramObj.width;
 
     // alert(folder);
     // alert(fileName);
     // alert(subFolder);
     openFile(psdFilePath);
-    resizeToWidth(width);
+    //resizeToWidth(width);
     createFolderIfNotExist(psdFolder + "/" + subFolder);
-    savePngThumbnail(pngFilePath);
+    var exportOptions = new ExportOptionsSaveForWeb();
+    exportOptions.format = SaveDocumentType.JPEG;
+
+    app.activeDocument.resizeImage(250);
+    app.activeDocument.exportDocument(new File(jpgFilePath + ".jpg"), ExportType.SAVEFORWEB, exportOptions);
     app.activeDocument.close(SaveOptions.DONOTSAVECHANGES);
-    return JSON.lave({thumbnailPath: pngFilePath + ".png"});
+    return JSON.lave({thumbnailPath: jpgFilePath + ".jpg"});
 }
 
 function openFile(path) {
@@ -89,4 +93,16 @@ function createFolderIfNotExist(path) {
 function openDocument(location){
   var fileRef = new File(location);
   var docRef = app.open(fileRef);
+}
+
+function hidePalettes() {
+    if(CheckIfAnyPalleteIsVisible() == true){
+    app.togglePalettes();
+    }
+}
+
+function showPalettes() {
+    if(CheckIfAnyPalleteIsVisible() == false){
+    app.togglePalettes();
+    }
 }

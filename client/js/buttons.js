@@ -1,7 +1,7 @@
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, regexp: true, indent: 4, maxerr: 50 */
 /*global $, window, location, CSInterface, SystemPath, themeManager*/
 
-$("#restartExt").click(function() {
+$("#restartExt").on("click", function() {
     try {
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         // if we're restarting then we should remove all the eventListeners so we don't get double events //
@@ -28,13 +28,16 @@ $("#next-phase").on("click", () => jsx.file("./host/cibule-posun_vpred.jsx"));
 
 $("#clear-cache").on("click", () => clearCache());
 
-$("#load-image").on("click", () => importImage());
+$("#create-thumbnails").on("click", () => createThumbnails());
 
+$("#restore-thumbnails").on("click", () => retrieveWorkingEnvironment());
+
+//rescale scrollbar
 $(window).on("resize", () => sly.reload());
 
 $slides.on("dblclick",() => jsx.evalScript(`openFile("${getPSDFilePathFromSlide()}")`));
 
 function getPSDFilePathFromSlide() {
     $activeSlide = $slides.find(".active");
-    return $activeSlide.data("folder") + "/" + $activeSlide.data("fileName");
+    return $activeSlide.attr("folder") + "/" + $activeSlide.attr("fileName");
 }

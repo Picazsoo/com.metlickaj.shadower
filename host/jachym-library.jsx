@@ -807,21 +807,6 @@ function OpacityToPercent(percentage) { //such as 40
     executeAction(sTID('imageSize'), desc1, DialogModes.NO);
   };
 
-  //save as png to path
-  function savePngThumbnail(path) { // "/g/testy/robot"
-    var desc1 = new ActionDescriptor();
-    var desc2 = new ActionDescriptor();
-    desc2.putEnumerated(cTID('Mthd'), sTID("PNGMethod"), sTID("quick"));
-    desc2.putEnumerated(sTID("PNGInterlaceType"), sTID("PNGInterlaceType"), sTID("PNGInterlaceNone"));
-    desc2.putEnumerated(sTID("PNGFilter"), sTID("PNGFilter"), sTID("PNGFilterAdaptive"));
-    desc2.putInteger(cTID('Cmpr'), 6);
-    desc1.putObject(cTID('As  '), sTID("PNGFormat"), desc2);
-    desc1.putPath(cTID('In  '), new File(path));
-    desc1.putInteger(cTID('DocI'), 234);
-    desc1.putBoolean(cTID('Cpy '), true);
-    executeAction(cTID('save'), desc1, DialogModes.NO);
-  };
-
  function PlacePSD(fileNameAndPath) { //such as "/e/90/90_ae/FAZE/01_FAZE_002.psd"
     var desc1 = new ActionDescriptor();
     desc1.putPath(cTID('null'), new File(fileNameAndPath));
