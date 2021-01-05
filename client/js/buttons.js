@@ -20,8 +20,15 @@ $("#restartExt").on("click", function() {
     }
 });
 
+//Ovladač zapínání a vypínání celé aplikace.
+$("#shadowerEnabledSwitch").on("click" , function() { setShadowerStatus(this.checked)});
+
+$('#shadowerEnabledSwitch').on("change", function(){
+    $('#status').html(this.checked?'callback true':'callback false');
+});
+
+
 $("#openShadower").on("click" , () => jsx.evalScript("loadFiles('explorer')", addFiles));
-//$("#openShadower").on("click" , () => jsx.file("./host/stinovac_18_09_2019.jsx"));
 
 $("#previous-phase").on("click", () => jsx.file("./host/cibule-posun_vzad.jsx"));
 $("#next-phase").on("click", () => jsx.file("./host/cibule-posun_vpred.jsx"));
@@ -30,14 +37,20 @@ $("#clear-cache").on("click", () => clearCache());
 
 $("#create-thumbnails").on("click", () => createThumbnails());
 
-$("#restore-thumbnails").on("click", () => retrieveWorkingEnvironment());
+$("#toggle-pinned").on("click", () => togglePinned());
+
+$("#restore-thumbnails").on("click", () => {});
 
 //rescale scrollbar
 $(window).on("resize", () => sly.reload());
 
-$slides.on("dblclick",() => jsx.evalScript(`openFile("${getPSDFilePathFromSlide()}")`));
+//$slides.on("dblclick",() => jsx.evalScript(`openFile("${getPSDFilePathFromSlide()}")`));
+//$slides.on("dblclick",(event) => jsx.evalScript(`openFile("${getPSDFilePathFromEvent(event)}")`));
+$slides.on("dblclick",(event) => openSlideForShadowing(event));
 
-function getPSDFilePathFromSlide() {
-    $activeSlide = $slides.find(".active");
+
+function getPSDFilePathFromEvent(event) {
+    $activeSlide = $(event.target).closest("li");
+    console.log($activeSlide);
     return $activeSlide.attr("folder") + "/" + $activeSlide.attr("fileName");
 }

@@ -62,8 +62,21 @@ h3 {
 	height: 100%;
 }
 
-.frame .slidee li.active div {
+.frame .slidee li.active div.slideframe {
 	background: #2680eb;
+}
+
+.frame .slidee li.pinned div.slideframe {
+	background: #4017b1;
+}
+
+.frame .slidee li.pinned.active div {
+	background: transparent;
+}
+
+.frame .slidee li.pinned.active div.slideframe {
+	background-image: linear-gradient(135deg, #2680eb 25%, #4017b1 25%, #4017b1 50%, #2680eb 50%, #2680eb 75%, #4017b1 75%, #4017b1 100%);
+	background-size: 28.28px 28.28px;
 }
 
 .scrollbar {
@@ -89,6 +102,7 @@ h3 {
 	height: 95px;
 	background: #4a4a4a;
 	margin: 4px;
+	position: relative;
   }
 
   .imageholder > img {
@@ -104,3 +118,25 @@ h3 {
     overflow: hidden;
 	white-space: nowrap;
   }
+
+  .static-button {
+	visibility: hidden;
+    position: absolute;
+    left: 5px;
+	top: 5px;
+}
+
+li.active .static-button {
+	visibility: visible;
+	opacity: 0.5;
+}
+
+li.pinned .static-button {
+	visibility: visible;
+	opacity: 1.0;
+}
+
+li.pinned.active .static-button {
+	visibility: visible;
+	opacity: 1.0;
+}

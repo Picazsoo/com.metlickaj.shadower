@@ -64,16 +64,12 @@ function getJpgThumbnail(paramObj) {
     var jpgFilePath = psdFolder + "/" + subFolder + "/" + psdFileName.substring(0, psdFileName.toUpperCase().lastIndexOf(".PSD"));
     var width = paramObj.width;
 
-    // alert(folder);
-    // alert(fileName);
-    // alert(subFolder);
     openFile(psdFilePath);
-    //resizeToWidth(width);
     createFolderIfNotExist(psdFolder + "/" + subFolder);
+    app.activeDocument.resizeImage(250);
     var exportOptions = new ExportOptionsSaveForWeb();
     exportOptions.format = SaveDocumentType.JPEG;
 
-    app.activeDocument.resizeImage(250);
     app.activeDocument.exportDocument(new File(jpgFilePath + ".jpg"), ExportType.SAVEFORWEB, exportOptions);
     app.activeDocument.close(SaveOptions.DONOTSAVECHANGES);
     return JSON.lave({thumbnailPath: jpgFilePath + ".jpg"});
