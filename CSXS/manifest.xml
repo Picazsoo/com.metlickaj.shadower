@@ -35,16 +35,16 @@
 					<Menu>Shadower</Menu>
 					<Geometry>
 						<Size>
-							<Height>400</Height>
-							<Width>600</Width>							
+							<Height>165</Height>
+							<Width>875</Width>							
 						</Size>
 						<MaxSize>
-							<Height>400</Height>
+							<Height>175</Height>
 							<Width>4000</Width>
 						</MaxSize>
 						<MinSize>
-							<Height>400</Height>
-							<Width>400</Width>
+							<Height>165</Height>
+							<Width>625</Width>
 						</MinSize>						
 					</Geometry>
 				</UI>

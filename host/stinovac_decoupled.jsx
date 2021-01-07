@@ -102,3 +102,69 @@ function showPalettes() {
     app.togglePalettes();
     }
 }
+
+function getDocumentDimensionsPx(documentIndex) {
+    var document;
+    if(documentIndex == undefined) {
+        document = app.activeDocument;
+    } else {
+        document = app.documents[documentIndex]
+    }
+    return JSON.lave({
+        widthPx: document.width.as("px"),
+        heightPx: document.height.as("px")
+    })
+}
+
+function shadowFromCurrentPreviousAndPinned(obj) {
+
+    var widthPx = obj.dimensionsInPx.widthPx;
+    var heightPx = obj.dimensionsInPx.heightPx;
+    var shadowDocumentName = obj.shadowDocumentName;
+    //definitely obtain the shadow document (either find it or create it and find it)
+    var shadowDocument = getDocumentAtAllCosts(obj.shadowDocumentName, obj.dimensionsInPx);
+    app.activeDocument = shadowDocument;
+    //pokud mame pinned vrstvu, tak ji pripnout.
+    placePinnedPSD(obj);
+    if(obj.previousFilePath) {
+        PlacePSD(obj.previousFilePath);
+        RenameLayer("minula-" + obj.previousFilePath);
+        OpacityToPercent(40);
+    }
+    //this should always evaluate true
+    if(obj.currentFilePath) {
+        PlacePSD(obj.currentFilePath);
+        RenameLayer("aktualni-" + obj.currentFilePath);
+        OpacityToPercent(40);
+    }
+}
+
+function placePinnedPSD(obj) {
+    var layers = app.activeDocument.layers;
+    alert(layers.length);
+    if(obj.pinnedFilePath && layers.length != 0) {
+        var layerName = "pripnuta-" + obj.pinnedFilePath;
+        var layerObject;
+        try {
+            layerObject = layers.getByName(layerName);
+        } catch (err) {
+            layers.removeAll();
+            PlacePSD(obj.pinnedFilePath);
+        }
+        RenameLayer(layerName);
+        OpacityToPercent(40);
+    }
+}
+
+function getDocumentAtAllCosts(documentName, dimensionsInPx) {
+    var widthPx = dimensionsInPx.widthPx;
+    var heightPx = dimensionsInPx.heightPx;
+    var document;
+    try {
+        document = app.documents.getByName(documentName);
+    } catch(err) {
+        CreateNewDocument(documentName, widthPx, heightPx, 300);
+        document = app.documents.getByName(documentName);
+    }
+    return document;
+}

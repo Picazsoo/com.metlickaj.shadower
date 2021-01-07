@@ -14,8 +14,7 @@ h3 {
 }
 
 #container {
-	width: 95%;
-	margin: 20px auto;
+	margin: 5px 5px 5px 5px;
 }
 
 .switch {
@@ -30,9 +29,9 @@ h3 {
 	height: 100px;
 }
 
-.wrap {
+#wrap {
 	position: relative;
-	margin: 3em 0;
+	margin-bottom: 5px;
 }
 
 .frame {
@@ -45,7 +44,7 @@ h3 {
 .frame .slidee {
 	margin: 0;
 	padding: 0;
-	height: 125px;
+	height: 100px;
 	list-style: none;
 }
 
@@ -76,13 +75,13 @@ h3 {
 
 .frame .slidee li.pinned.active div.slideframe {
 	background-image: linear-gradient(135deg, #2680eb 25%, #4017b1 25%, #4017b1 50%, #2680eb 50%, #2680eb 75%, #4017b1 75%, #4017b1 100%);
-	background-size: 28.28px 28.28px;
+	background-size: 28px 28px;
 }
 
 .scrollbar {
 	width: 100%;
 	height: 12px;
-	padding:2px;
+	padding: 0;
 	background-color: #4a4a4a;
 }
 
@@ -90,6 +89,8 @@ h3 {
 	width: 100px; /* overriden if dynamicHandle: 1 */
 	height: 100%;
 	background: #696969;
+	border: #4a4a4a 1px solid;
+    box-sizing: border-box;
 }
 
 .slideframe {
@@ -98,25 +99,25 @@ h3 {
   }
   
   .imageholder {
-	width: 150px;
-	height: 95px;
+	height: 71px;
 	background: #4a4a4a;
 	margin: 4px;
 	position: relative;
   }
 
   .imageholder > img {
-	width: 150px;
+	width: 112px;
   }
   
   .filename {
     height: 20px;
-    padding-left: 5px;
-    font-size: smaller;
+    font-size: 12px;
     text-overflow: ellipsis;
-    width: 148px;
     overflow: hidden;
 	white-space: nowrap;
+	width: 112px;
+	margin: 0 4px 0 4px;
+	direction: rtl;
   }
 
   .static-button {
@@ -140,3 +141,5 @@ li.pinned.active .static-button {
 	visibility: visible;
 	opacity: 1.0;
 }
+
+.tooltip.in{opacity:1!important;}

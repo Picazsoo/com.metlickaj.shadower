@@ -4,8 +4,17 @@
 //name of folder for storing of thumbnails
 const thumbnailFolderName = ".shadow";
 
+//jmeno temp souboru, ktery drzi aktualni stin a cibule
+const shadowDocumentName = "stinovani";
+
 //current folder in which we work
 let currentWorkingFolder = null;
+let documentDimensions;
+
+function setDocumentDimensions(jsonDimensions) {
+    documentDimensions = JSON.parse(jsonDimensions);
+    console.log("width: " + documentDimensions.widthPx, "height: " + documentDimensions.heightPx);
+}
 
 'use strict';
 jsx.file('./host/stinovac_decoupled.jsx');
@@ -70,6 +79,7 @@ function setShadowerStatus(isEnabled) {
     } else {
         currentWorkingFolder = null;
         emptySlides();
+        $sheetButton.attr("disabled", true);
     }
 }
 
@@ -91,10 +101,12 @@ function isOpenFile(numberOfOpenFiles) {
 
 // Má obrázek v názvu slovo "FAZE"? Pokud ano, tak
 function isValidFileName(filePath) {
+    filePath = decodeURI(filePath);
     console.log(filePath);
     if(filePath.toString().toUpperCase().indexOf("_FAZE_") != -1) {
         let fileName = getFileNameFromESPath(filePath);
         let folderPath = getWinPathFromESPath(filePath);
+        jsx.evalScript("getDocumentDimensionsPx()", setDocumentDimensions);
         if(folderPath == currentWorkingFolder) {
             //pokud je folderpath identická s currentWorkingFolder, tak uz mame thumbnails a nic nedelame.
             return;
@@ -172,8 +184,8 @@ function getSavedDocument(event) {
     //Tady se bude muset obnovovat thumbnail pro ten jeden soubor, co se zrovna uložil.
 }
 
-//clickable folder link
-const $sheetFolder = $('#working-folder');
+//current folder button
+const $sheetButton = $('#working-folder');
 
 //vyčistí slides a reloadne je, aby se aktualizoval scrollbar
 function emptySlides() {
@@ -193,7 +205,7 @@ function populateSlides(fileNames, folder) {
                     <div class="imageholder">
                         <img>
                         <div class="static-button">
-                        <button id="toggle-pinned" class="topcoat-button" onclick="togglePinned(this)"><i class="fas fa-thumbtack"></i></button>
+                        <button id="toggle-pinned" class="topcoat-button" title="Připnout statickou fázi" onclick="togglePinned(this)"><i class="fas fa-thumbtack"></i></button>
                         </div>
                     </div>
                     <div class="filename">
@@ -211,11 +223,18 @@ function populateSlides(fileNames, folder) {
         .appendTo($slides);
     });
     sly.reload();
-    $sheetFolder.html(`<a id="link-to-working-folder" href="#" onclick="openFolder('${folder}');return false">${folder}</a>`);
+    if(fileNames.length) {
+        $sheetButton.attr("path", folder);
+        $sheetButton.attr('data-original-title', "Otevřít v průzkumníku cestu " + folder);
+        $sheetButton.attr('disabled', false);
+    } else {
+        $sheetButton.attr('disabled', true);
+    }
 }
 
-function openFolder(dir) {
-    let pathToDir = windoizePath(dir);
+function openFolder() {
+    let pathToDir = $sheetButton.attr("path");
+    pathToDir = windoizePath(pathToDir);
     window.cep.process.createProcess('C:\\Windows\\explorer.exe', pathToDir);
 }
 
@@ -279,12 +298,24 @@ function createThumbnails() {
 
 function openSlideForShadowing() {
 
-    $currentSlide = $slides.find(".active");
-    $previousSlide = $currentSlide.prevAll('li').not(".pinned").first();
-    $pinnedSlide = $slides.find('.pinned:not(".active")');
-    console.log("current: " + getPSDFilePathFromSlide($currentSlide));
-    console.log("previous: " + getPSDFilePathFromSlide($previousSlide));
-    console.log("pinned: " + getPSDFilePathFromSlide($pinnedSlide));
+    let $currentSlide = $slides.find(".active");
+    let $previousSlide = $currentSlide.prevAll('li').not(".pinned").first();
+    let $pinnedSlide = $slides.find('.pinned:not(".active")');
+    let currentFilePath = getPSDFilePathFromSlide($currentSlide);
+    let previousFilePath = getPSDFilePathFromSlide($previousSlide);
+    let pinnedFilePath = getPSDFilePathFromSlide($pinnedSlide);
+    let obj = {
+        'shadowDocumentName': shadowDocumentName,
+        'currentFilePath': currentFilePath,
+        'previousFilePath': previousFilePath,
+        'pinnedFilePath': pinnedFilePath,
+        'dimensionsInPx': documentDimensions
+    }
+    console.log("current: " + currentFilePath);
+    console.log("previous: " + previousFilePath);
+    console.log("pinned: " + pinnedFilePath);
+
+    jsx.evalScript(`shadowFromCurrentPreviousAndPinned(${JSON.stringify(obj)})`);
 }
 
 //returns path to slide.

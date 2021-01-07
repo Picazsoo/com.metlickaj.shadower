@@ -37,9 +37,8 @@ $("#clear-cache").on("click", () => clearCache());
 
 $("#create-thumbnails").on("click", () => createThumbnails());
 
-$("#toggle-pinned").on("click", () => togglePinned());
-
-$("#restore-thumbnails").on("click", () => {});
+//$("#working-folder").on("click", () => jsx.evalScript('alert(app.activeDocument.width.as("px"))'));
+$("#working-folder").on("click", () => openFolder());
 
 //rescale scrollbar
 $(window).on("resize", () => sly.reload());
@@ -54,3 +53,7 @@ function getPSDFilePathFromEvent(event) {
     console.log($activeSlide);
     return $activeSlide.attr("folder") + "/" + $activeSlide.attr("fileName");
 }
+
+$(window).on("ready", function(){
+    $("[rel='tooltip']").tooltip();
+      })
