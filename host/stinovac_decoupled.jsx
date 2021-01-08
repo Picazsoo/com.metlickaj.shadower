@@ -125,6 +125,7 @@ function shadowFromCurrentPreviousAndPinned(obj) {
     var shadowDocument = getDocumentAtAllCosts(obj.shadowDocumentName, obj.dimensionsInPx);
     app.activeDocument = shadowDocument;
     //pokud mame pinned vrstvu, tak ji pripnout.
+    //alert(JSON.lave(obj));
     if(obj.pinnedFilePath) {
         var pinLayerName = "pin-" + obj.pinnedFilePath;
         //pokud najdu pinned vrstvu se stejnym jmenem, tak nebudu nic delat
@@ -133,14 +134,14 @@ function shadowFromCurrentPreviousAndPinned(obj) {
         } else {
             //pokud existuje "nejaka" pinned layer, tak ji chci vybrat a nahradit novou pinned vrstvou
             if(selectLayerStartingWith("pin-")) {
-                replaceSmartObjContents(obj.pinnedFilePath);
-            } else {
-                SelectAllPixels();
-                PlacePSD(obj.pinnedFilePath);
-                OpacityToPercent(40);
+                DeleteLayer();
             }
-            setSmartObjLayerComp("pavel-stinovani");
+            SelectLayer("pinHolder");
+            SelectAllPixels();
+            PlacePSD(obj.pinnedFilePath);
             RenameLayer("pin-" + obj.pinnedFilePath);
+            OpacityToPercent(40);
+            setSmartObjLayerCompByName("pavel-stinovani");
         }
     } else {
         if(selectLayerStartingWith("pin-")) {
@@ -154,15 +155,14 @@ function shadowFromCurrentPreviousAndPinned(obj) {
             //do nothing
         } else {
             if(selectLayerStartingWith("prev-")) {
-                replaceSmartObjContents(obj.previousFilePath);
-            } else {
-                SelectAllPixels();
-                PlacePSD(obj.previousFilePath);
-                OpacityToPercent(60);
+                DeleteLayer();
             }
-            setSmartObjLayerComp("pavel-stinovani")
+            SelectLayer("prevHolder");
+            SelectAllPixels();
+            PlacePSD(obj.previousFilePath);
             RenameLayer("prev-" + obj.previousFilePath);
-
+            OpacityToPercent(60);
+            setSmartObjLayerCompByName("pavel-stinovani");
         }
     } else {
         if(selectLayerStartingWith("prev-")) {
@@ -176,14 +176,14 @@ function shadowFromCurrentPreviousAndPinned(obj) {
             //do nothing
         } else {
             if(selectLayerStartingWith("top-")) {
-                replaceSmartObjContents(obj.currentFilePath);
-            } else {
-                SelectAllPixels();
-                PlacePSD(obj.currentFilePath);
-                OpacityToPercent(80);
+                DeleteLayer();
             }
-            setSmartObjLayerComp("stinovana-faze");
+            SelectLayer("topHolder");
+            SelectAllPixels();
+            PlacePSD(obj.currentFilePath);
             RenameLayer("top-" + obj.currentFilePath);
+            OpacityToPercent(80);
+            setSmartObjLayerCompByName("stinovana-faze");
         }
     } else {
         if(selectLayerStartingWith("top-")) {
@@ -191,7 +191,6 @@ function shadowFromCurrentPreviousAndPinned(obj) {
         }
     }
     //
-    tady musim z vrchniho 
 
     //smaze historii, aby Pavel a Franta nemohli couvat do akce skriptu.
     purgeAllHistory();
@@ -215,6 +214,15 @@ function getDocumentAtAllCosts(documentName, dimensionsInPx) {
     } catch(err) {
         CreateNewDocument(documentName, widthPx, heightPx, 300);
         document = app.documents.getByName(documentName);
+        var layerRef = document.artLayers.add();
+        layerRef.name = "pinHolder";
+        layerRef.allLocked = true;
+        layerRef = document.artLayers.add();
+        layerRef.name = "prevHolder";
+        layerRef.allLocked = true;
+        layerRef = document.artLayers.add();
+        layerRef.name = "topHolder";
+        layerRef.allLocked = true;
     }
     return document;
 }

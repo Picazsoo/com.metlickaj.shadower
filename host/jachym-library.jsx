@@ -440,21 +440,21 @@ function SquareSelection(leftPxl, topPxl, rghtPxl, btomPxl) {
 
 // Color Range - puvodni skener
 /*function JachDiraColorRange() {
-    var desc1 = new ActionDescriptor();
-    desc1.putInteger(cTID('Fzns'), 0);
-    var desc2 = new ActionDescriptor();
-    desc2.putDouble(cTID('Lmnc'), 63.97);
-    desc2.putDouble(cTID('A   '), -59.22);
-    desc2.putDouble(cTID('B   '), -0.32);
-    desc1.putObject(cTID('Mnm '), cTID('LbCl'), desc2);
-    var desc3 = new ActionDescriptor();
-    desc3.putDouble(cTID('Lmnc'), 85.8);
-    desc3.putDouble(cTID('A   '), -15.69);
-    desc3.putDouble(cTID('B   '), 12.7);
-    desc1.putObject(cTID('Mxm '), cTID('LbCl'), desc3);
-    desc1.putInteger(sTID("colorModel"), 0);
-    executeAction(sTID('colorRange'), desc1, DialogModes.NO);
-  };
+var desc1 = new ActionDescriptor();
+desc1.putInteger(cTID('Fzns'), 0);
+var desc2 = new ActionDescriptor();
+desc2.putDouble(cTID('Lmnc'), 63.97);
+desc2.putDouble(cTID('A   '), -59.22);
+desc2.putDouble(cTID('B   '), -0.32);
+desc1.putObject(cTID('Mnm '), cTID('LbCl'), desc2);
+var desc3 = new ActionDescriptor();
+desc3.putDouble(cTID('Lmnc'), 85.8);
+desc3.putDouble(cTID('A   '), -15.69);
+desc3.putDouble(cTID('B   '), 12.7);
+desc1.putObject(cTID('Mxm '), cTID('LbCl'), desc3);
+desc1.putInteger(sTID("colorModel"), 0);
+executeAction(sTID('colorRange'), desc1, DialogModes.NO);
+};
 */
 // Color Range - novy skener - elektricka paska
 function JachDiraColorRange() {
@@ -907,7 +907,7 @@ function setSmartObjLayerCompByName(name) {
             };
         };
         //its a little dirty to use the name as object attr key - but it works for now.
-        if(theSOComps[name]) {
+        if (theSOComps[name]) {
             setSmartObjLayerCompById(theSOComps[name]);
         }
         return;
@@ -915,49 +915,55 @@ function setSmartObjLayerCompByName(name) {
 }
 
 function replaceSmartObjContents(filePath) {
+    alert("see selected layer");
+    alert("replacing with " + filePath);
     var desc1 = new ActionDescriptor();
-    desc1.putPath(cTID('null'), new File(filePath);
+    desc1.putPath(cTID('null'), new File(filePath));
     executeAction(sTID('placedLayerReplaceContents'), desc1, DialogModes.NO);
 };
 
 function getNameOfLayerStartingWith(startOfString) {
     var layers = app.activeDocument.layers;
     var numOfLayers = layers.length;
-    for(var i = 0; i < numOfLayers; i++) {
+    for (var i = 0; i < numOfLayers; i++) {
         var name = layers[i].name;
-        if(name.indexOf(startOfString) != -1) {
+        if (name.indexOf(startOfString) != -1) {
             return name
         }
-    } return undefined;
+    }
+    return undefined;
 };
 
 //selects layer starting with the string and returns true if it manages to select it.
 function selectLayerStartingWith(startOfString) {
+    //alert("trying to select layer " + startOfString);
     var layerName = getNameOfLayerStartingWith(startOfString);
-    if(layerName) {
+    if (layerName) {
+        //alert("found layer name " + layerName);
         SelectLayer(layerName);
         return true;
     }
+    //alert("no layer starting with " + startOfString + " found");
     return false;
 };
 
 function setSmartObjLayerCompById(layerCompId) {
-  var desc1 = new ActionDescriptor();
-  var ref1 = new ActionReference();
-  ref1.putEnumerated(cTID('Lyr '), cTID('Ordn'), cTID('Trgt'));
-  desc1.putReference(cTID('null'), ref1);
-  desc1.putInteger(sTID("compID"), layerCompId);
-  executeAction(sTID('setPlacedLayerComp'), desc1, DialogModes.NO);
+    var desc1 = new ActionDescriptor();
+    var ref1 = new ActionReference();
+    ref1.putEnumerated(cTID('Lyr '), cTID('Ordn'), cTID('Trgt'));
+    desc1.putReference(cTID('null'), ref1);
+    desc1.putInteger(sTID("compID"), layerCompId);
+    executeAction(sTID('setPlacedLayerComp'), desc1, DialogModes.NO);
 };
 
 //Clears history for document
 function clearhistoryForCurrDocumentNondestructive() {
-  var desc1 = new ActionDescriptor();
-  var ref1 = new ActionReference();
-  ref1.putProperty(cTID('Prpr'), cTID('HsSt'));
-  ref1.putEnumerated(cTID('Dcmn'), cTID('Ordn'), cTID('Trgt'));
-  desc1.putReference(cTID('null'), ref1);
-  executeAction(cTID('Cler'), desc1, DialogModes.NO);
+    var desc1 = new ActionDescriptor();
+    var ref1 = new ActionReference();
+    ref1.putProperty(cTID('Prpr'), cTID('HsSt'));
+    ref1.putEnumerated(cTID('Dcmn'), cTID('Ordn'), cTID('Trgt'));
+    desc1.putReference(cTID('null'), ref1);
+    executeAction(cTID('Cler'), desc1, DialogModes.NO);
 };
 
 function purgeAllHistory() {

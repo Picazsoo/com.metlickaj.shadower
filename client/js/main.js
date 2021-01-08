@@ -64,6 +64,9 @@ const sly = new Sly('#frame', {
 });
 sly.init();
 
+//nastavuje "previous" class na policko vedle "active", kdykoliv se active zmeni.
+sly.on('active', properlyMarkPrevious);
+
 function getShadowerStatus() {
     let status = localStorage.getItem("enabled") == "true";
     $("#shadowerEnabledSwitch").prop("checked", status);
@@ -303,7 +306,6 @@ function createThumbnails() {
 ///// - kod pro samotne stinovani -
 
 function openSlideForShadowing() {
-
     let $currentSlide = $slides.find(".active");
     let $previousSlide = $currentSlide.prevAll('li').not(".pinned").first();
     let $pinnedSlide = $slides.find('.pinned:not(".active")');
@@ -344,6 +346,13 @@ function togglePinned(button) {
         $slides.find(".pinned").removeClass("pinned");
         $toggledSlide.addClass("pinned")
     }
+    //put "previous" to proper place!
+    properlyMarkPrevious();
+}
+
+function properlyMarkPrevious() {
+    $slides.find(".previous").removeClass("previous");
+    $slides.find(".active").prevAll('li').not(".pinned").first().addClass("previous");
 }
 
 function tryPopulateSlides(event) {

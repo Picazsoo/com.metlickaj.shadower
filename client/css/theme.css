@@ -65,6 +65,10 @@ h3 {
 	background: #2680eb;
 }
 
+.frame .slidee li.previous div.slideframe {
+	background: #788ba2;
+}
+
 .frame .slidee li.pinned div.slideframe {
 	background: #4017b1;
 }
