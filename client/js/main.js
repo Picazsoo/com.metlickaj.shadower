@@ -214,7 +214,7 @@ function populateSlides(fileNames, folder) {
                     <div class="imageholder">
                         <img>
                         <div class="static-button">
-                        <button id="toggle-pinned" class="topcoat-button" title="Připnout statickou fázi" onclick="togglePinned(this)"><i class="fas fa-thumbtack"></i></button>
+                        <button id="toggle-pinned" class="topcoat-button" title="Připnout/odepnout statickou fázi" onclick="togglePinned(this)"><i class="fas fa-thumbtack"></i></button>
                         </div>
                     </div>
                     <div class="filename">

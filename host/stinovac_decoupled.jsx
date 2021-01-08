@@ -131,6 +131,7 @@ function shadowFromCurrentPreviousAndPinned(obj) {
         //pokud najdu pinned vrstvu se stejnym jmenem, tak nebudu nic delat
         if(layerExists(pinLayerName)) {
             //do nothing for the pin layer
+            LayerVisibility(pinLayerName, true);
         } else {
             //pokud existuje "nejaka" pinned layer, tak ji chci vybrat a nahradit novou pinned vrstvou
             if(selectLayerStartingWith("pin-")) {
@@ -141,6 +142,7 @@ function shadowFromCurrentPreviousAndPinned(obj) {
             PlacePSD(obj.pinnedFilePath);
             RenameLayer("pin-" + obj.pinnedFilePath);
             OpacityToPercent(40);
+            ShowLayer(true);
             setSmartObjLayerCompByName("pavel-stinovani");
         }
     } else {
@@ -152,7 +154,8 @@ function shadowFromCurrentPreviousAndPinned(obj) {
     if(obj.previousFilePath) {
         var prevLayerName = "prev-" + obj.previousFilePath;
         if(layerExists(prevLayerName)) {
-            //do nothing
+            //make sure it is visible
+            LayerVisibility(prevLayerName, true)
         } else {
             if(selectLayerStartingWith("prev-")) {
                 DeleteLayer();
@@ -162,6 +165,7 @@ function shadowFromCurrentPreviousAndPinned(obj) {
             PlacePSD(obj.previousFilePath);
             RenameLayer("prev-" + obj.previousFilePath);
             OpacityToPercent(60);
+            ShowLayer(true);
             setSmartObjLayerCompByName("pavel-stinovani");
         }
     } else {
@@ -173,7 +177,8 @@ function shadowFromCurrentPreviousAndPinned(obj) {
     if(obj.currentFilePath) {
         var curLayerName = "top-" + obj.currentFilePath;
         if(layerExists(curLayerName)) {
-            //do nothing
+            //make sure it is visible
+            LayerVisibility(curLayerName, true)
         } else {
             if(selectLayerStartingWith("top-")) {
                 DeleteLayer();
@@ -183,6 +188,7 @@ function shadowFromCurrentPreviousAndPinned(obj) {
             PlacePSD(obj.currentFilePath);
             RenameLayer("top-" + obj.currentFilePath);
             OpacityToPercent(80);
+            ShowLayer(true);
             setSmartObjLayerCompByName("stinovana-faze");
         }
     } else {
