@@ -125,35 +125,85 @@ function shadowFromCurrentPreviousAndPinned(obj) {
     var shadowDocument = getDocumentAtAllCosts(obj.shadowDocumentName, obj.dimensionsInPx);
     app.activeDocument = shadowDocument;
     //pokud mame pinned vrstvu, tak ji pripnout.
-    placePinnedPSD(obj);
+    if(obj.pinnedFilePath) {
+        var pinLayerName = "pin-" + obj.pinnedFilePath;
+        //pokud najdu pinned vrstvu se stejnym jmenem, tak nebudu nic delat
+        if(layerExists(pinLayerName)) {
+            //do nothing for the pin layer
+        } else {
+            //pokud existuje "nejaka" pinned layer, tak ji chci vybrat a nahradit novou pinned vrstvou
+            if(selectLayerStartingWith("pin-")) {
+                replaceSmartObjContents(obj.pinnedFilePath);
+            } else {
+                SelectAllPixels();
+                PlacePSD(obj.pinnedFilePath);
+                OpacityToPercent(40);
+            }
+            setSmartObjLayerComp("pavel-stinovani");
+            RenameLayer("pin-" + obj.pinnedFilePath);
+        }
+    } else {
+        if(selectLayerStartingWith("pin-")) {
+            DeleteLayer()
+        }
+        //pokud existuje "nejaka" pinned layer, tak ji chci odstranit 
+    }
     if(obj.previousFilePath) {
-        PlacePSD(obj.previousFilePath);
-        RenameLayer("minula-" + obj.previousFilePath);
-        OpacityToPercent(40);
+        var prevLayerName = "prev-" + obj.previousFilePath;
+        if(layerExists(prevLayerName)) {
+            //do nothing
+        } else {
+            if(selectLayerStartingWith("prev-")) {
+                replaceSmartObjContents(obj.previousFilePath);
+            } else {
+                SelectAllPixels();
+                PlacePSD(obj.previousFilePath);
+                OpacityToPercent(60);
+            }
+            setSmartObjLayerComp("pavel-stinovani")
+            RenameLayer("prev-" + obj.previousFilePath);
+
+        }
+    } else {
+        if(selectLayerStartingWith("prev-")) {
+            DeleteLayer()
+        }
     }
     //this should always evaluate true
     if(obj.currentFilePath) {
-        PlacePSD(obj.currentFilePath);
-        RenameLayer("aktualni-" + obj.currentFilePath);
-        OpacityToPercent(40);
+        var curLayerName = "top-" + obj.currentFilePath;
+        if(layerExists(curLayerName)) {
+            //do nothing
+        } else {
+            if(selectLayerStartingWith("top-")) {
+                replaceSmartObjContents(obj.currentFilePath);
+            } else {
+                SelectAllPixels();
+                PlacePSD(obj.currentFilePath);
+                OpacityToPercent(80);
+            }
+            setSmartObjLayerComp("stinovana-faze");
+            RenameLayer("top-" + obj.currentFilePath);
+        }
+    } else {
+        if(selectLayerStartingWith("top-")) {
+            DeleteLayer();
+        }
     }
+    //
+    tady musim z vrchniho 
+
+    //smaze historii, aby Pavel a Franta nemohli couvat do akce skriptu.
+    purgeAllHistory();
 }
 
-function placePinnedPSD(obj) {
-    var layers = app.activeDocument.layers;
-    alert(layers.length);
-    if(obj.pinnedFilePath && layers.length != 0) {
-        var layerName = "pripnuta-" + obj.pinnedFilePath;
-        var layerObject;
-        try {
-            layerObject = layers.getByName(layerName);
-        } catch (err) {
-            layers.removeAll();
-            PlacePSD(obj.pinnedFilePath);
-        }
-        RenameLayer(layerName);
-        OpacityToPercent(40);
+function layerExists(layerName) {
+    try {
+        app.activeDocument.layers.getByName(layerName);
+    } catch (err) {
+        return false;
     }
+    return true;
 }
 
 function getDocumentAtAllCosts(documentName, dimensionsInPx) {
@@ -167,4 +217,19 @@ function getDocumentAtAllCosts(documentName, dimensionsInPx) {
         document = app.documents.getByName(documentName);
     }
     return document;
+}
+
+function getLayerComps() {
+    var layerComp = app.activeDocument.layerComps.getByName("vojta-vylevani");
+    return layerComp;
+}
+
+function getPathOfActiveDocument() {
+    var pathOfActiveDocument;
+    try {
+        pathOfActiveDocument = app.activeDocument.path + '/' + app.activeDocument.name;
+    } catch(err) {
+        pathOfActiveDocument = app.activeDocument.name;
+    }
+    return pathOfActiveDocument;
 }

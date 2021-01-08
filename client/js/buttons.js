@@ -37,8 +37,9 @@ $("#clear-cache").on("click", () => clearCache());
 
 $("#create-thumbnails").on("click", () => createThumbnails());
 
-//$("#working-folder").on("click", () => jsx.evalScript('alert(app.activeDocument.width.as("px"))'));
 $("#working-folder").on("click", () => openFolder());
+
+$("#test").on("click", () => jsx.evalScript("getLayerComps()", console.log));
 
 //rescale scrollbar
 $(window).on("resize", () => sly.reload());

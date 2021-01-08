@@ -43,7 +43,7 @@ const $slides = $('#slides');
 const sly = new Sly('#frame', {
         horizontal: 1,
         itemNav: 'basic',
-        smart: 1,
+        smart: 0,
         activateMiddle: 0,
         activateOn: 'click',
         mouseDragging: 1,
@@ -101,6 +101,12 @@ function isOpenFile(numberOfOpenFiles) {
 
 // Má obrázek v názvu slovo "FAZE"? Pokud ano, tak
 function isValidFileName(filePath) {
+    //pokud je otevreny temp soubor shadoweru
+    if(filePath == shadowDocumentName) {
+        //tak asi uz delam shadowing a neni treba delat nove nahledy
+        console.log("is the temp file for shadower");
+        return;
+    }
     filePath = decodeURI(filePath);
     console.log(filePath);
     if(filePath.toString().toUpperCase().indexOf("_FAZE_") != -1) {
@@ -175,7 +181,7 @@ function getActiveDocument() {
     }
     console.log("intercepted activation of a new document");
     //pokud je zrovna aktivovaný obrázek .psd
-    jsx.evalScript("app.activeDocument.path + '/' + app.activeDocument.name", isValidFileName);
+    jsx.evalScript("getPathOfActiveDocument()", isValidFileName);
 }
 
 csInterface.addEventListener("documentAfterSave", getSavedDocument);
