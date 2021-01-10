@@ -12,6 +12,7 @@ let currentWorkingFolder = null;
 let documentDimensions;
 
 function setDocumentDimensions(jsonDimensions) {
+    console.log(jsonDimensions);
     documentDimensions = JSON.parse(jsonDimensions);
     console.log("width: " + documentDimensions.widthPx, "height: " + documentDimensions.heightPx);
 }
@@ -115,7 +116,7 @@ function isValidFileName(filePath) {
     if(filePath.toString().toUpperCase().indexOf("_FAZE_") != -1) {
         let fileName = getFileNameFromESPath(filePath);
         let folderPath = getWinPathFromESPath(filePath);
-        jsx.evalScript("getDocumentDimensionsPx()", setDocumentDimensions);
+        jsx.evalScript('getDocumentDimensionsPx()', setDocumentDimensions);
         if(folderPath == currentWorkingFolder) {
             //pokud je folderpath identická s currentWorkingFolder, tak uz mame thumbnails a nic nedelame.
             return;
@@ -314,14 +315,27 @@ function openSlideForShadowing() {
     let pinnedFilePath = getPSDFilePathFromSlide($pinnedSlide);
     let obj = {
         'shadowDocumentName': shadowDocumentName,
-        'currentFilePath': currentFilePath,
-        'previousFilePath': previousFilePath,
-        'pinnedFilePath': pinnedFilePath,
+        'currentFile': {
+            path: currentFilePath,
+            prep: "top",
+            opacity: 85
+        },
+        'previousFile': {
+            path: previousFilePath,
+            prep: "prev",
+            opacity: 40
+        },
+        'pinnedFile': {
+            path: pinnedFilePath,
+            prep: "pin",
+            opacity: 20
+        },
         'dimensionsInPx': documentDimensions
     }
     console.log("current: " + currentFilePath);
     console.log("previous: " + previousFilePath);
     console.log("pinned: " + pinnedFilePath);
+    console.log(obj);
 
     jsx.evalScript(`shadowFromCurrentPreviousAndPinned(${JSON.stringify(obj)})`);
 }

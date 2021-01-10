@@ -1,7 +1,8 @@
-﻿cTID = function(s) {
+﻿function cTID(s) {
     return app.charIDToTypeID(s);
 };
-sTID = function(s) {
+
+function sTID(s) {
     return app.stringIDToTypeID(s);
 };
 
@@ -85,7 +86,20 @@ function PasteInPlace() {
     var desc1 = new ActionDescriptor();
     desc1.putBoolean(sTID("inPlace"), true);
     desc1.putEnumerated(cTID('AntA'), cTID('Annt'), cTID('Anno'));
+    desc1.putClass(cTID('As  '), cTID('Pxel')); //was added in jan 2021
     executeAction(cTID('past'), desc1, DialogModes.NO);
+};
+
+//Select all pixel of a visible layer
+function selectPixels() {
+    var desc1 = new ActionDescriptor();
+    var ref1 = new ActionReference();
+    ref1.putProperty(cTID('Chnl'), sTID("selection"));
+    desc1.putReference(cTID('null'), ref1);
+    var ref2 = new ActionReference();
+    ref2.putEnumerated(cTID('Chnl'), cTID('Chnl'), cTID('Trsp'));
+    desc1.putReference(cTID('T   '), ref2);
+    executeAction(cTID('setd'), desc1, DialogModes.NO);
 };
 
 // Set
@@ -356,6 +370,21 @@ function ShowLayer(trueorfalse) {
     }
 };
 
+// Hide
+function setVisibilityByLayerName(visible, layerName) {
+    var desc1 = new ActionDescriptor();
+    var list1 = new ActionList();
+    var ref1 = new ActionReference();
+    ref1.putName(cTID('Lyr '), layerName);
+    list1.putReference(ref1);
+    desc1.putList(cTID('null'), list1);
+    if (visible) {
+        executeAction(cTID('Shw '), desc1, DialogModes.NO);
+    } else {
+        executeAction(cTID('Hd  '), desc1, DialogModes.NO);
+    }
+};
+
 // Hue/Saturation
 function HueSaturationLightness(hue, saturation, lightness) {
 
@@ -543,6 +572,41 @@ function JachRotateAroundPosition(_angle, x, y) {
     desc1.putEnumerated(charIDToTypeID('Intr'), charIDToTypeID('Intp'), charIDToTypeID('Bcbc'));
     executeAction(charIDToTypeID('Trnf'), desc1, DialogModes.NO);
 }
+
+function rotateInDegrees(degrees) {
+    var desc1 = new ActionDescriptor();
+    var ref1 = new ActionReference();
+    ref1.putEnumerated(cTID('Dcmn'), cTID('Ordn'), cTID('Frst'));
+    desc1.putReference(cTID('null'), ref1);
+    desc1.putUnitDouble(cTID('Angl'), cTID('#Ang'), degrees);
+    executeAction(cTID('Rtte'), desc1, DialogModes.NO);
+};
+
+//Creates layer comp that allows to quicky toggle between layer arrangements
+function createLayerComp(compName, comment) {
+    var desc1 = new ActionDescriptor();
+    var ref1 = new ActionReference();
+    ref1.putClass(sTID("compsClass"));
+    desc1.putReference(cTID('null'), ref1);
+    var desc2 = new ActionDescriptor();
+    desc2.putBoolean(sTID("useVisibility"), true);
+    desc2.putBoolean(sTID("usePosition"), true);
+    desc2.putBoolean(sTID("useAppearance"), true);
+    desc2.putBoolean(sTID("useChildLayerCompState"), false);
+    desc2.putString(cTID('Ttl '), compName);
+    desc2.putString(sTID("comment"), comment);
+    desc1.putObject(cTID('Usng'), sTID("compsClass"), desc2);
+    executeAction(cTID('Mk  '), desc1, DialogModes.NO);
+};
+
+function applyLayerComp(compName) {
+    var layerComp = app.activeDocument.layerComps.getByName(compName);
+    if (layerComp) {
+        layerComp.apply();
+    } else {
+        alert("this layer comp does not exist!");
+    }
+};
 
 function JachHorizontalTransform(_hortrans, x, y) {
     var x, y, _hortrans;
@@ -881,6 +945,31 @@ function ReduceBGcomplexity() {
     executeAction(sTID('colorRange'), desc1, DialogModes.NO);
 };
 
+// Set
+function setColorOverlay(red, green, blue, opacity) {
+    var desc1 = new ActionDescriptor();
+    var ref1 = new ActionReference();
+    ref1.putProperty(cTID('Prpr'), cTID('Lefx'));
+    ref1.putEnumerated(cTID('Lyr '), cTID('Ordn'), cTID('Trgt'));
+    desc1.putReference(cTID('null'), ref1);
+    var desc2 = new ActionDescriptor();
+    desc2.putUnitDouble(cTID('Scl '), cTID('#Prc'), 416.666666666667);
+    var desc3 = new ActionDescriptor();
+    desc3.putBoolean(cTID('enab'), true);
+    desc3.putBoolean(sTID("present"), true);
+    desc3.putBoolean(sTID("showInDialog"), true);
+    desc3.putEnumerated(cTID('Md  '), cTID('BlnM'), cTID('Nrml'));
+    var desc4 = new ActionDescriptor();
+    desc4.putDouble(cTID('Rd  '), red);
+    desc4.putDouble(cTID('Grn '), green);
+    desc4.putDouble(cTID('Bl  '), blue);
+    desc3.putObject(cTID('Clr '), sTID("RGBColor"), desc4);
+    desc3.putUnitDouble(cTID('Opct'), cTID('#Prc'), opacity);
+    desc2.putObject(cTID('SoFi'), cTID('SoFi'), desc3);
+    desc1.putObject(cTID('T   '), cTID('Lefx'), desc2);
+    executeAction(cTID('setd'), desc1, DialogModes.NO);
+};
+
 function InvertMarchingAnts() {
     executeAction(cTID('Invs'), undefined, DialogModes.NO);
 };
@@ -968,6 +1057,24 @@ function clearhistoryForCurrDocumentNondestructive() {
 
 function purgeAllHistory() {
     app.purge(PurgeTarget.HISTORYCACHES);
+}
+
+function purgeClipboard() {
+    var desc1 = new ActionDescriptor();
+    desc1.putEnumerated(cTID('null'), cTID('PrgI'), cTID('Clpb'));
+    executeAction(cTID('Prge'), desc1, DialogModes.NO);
+}
+
+function hidePalettes() {
+    if(CheckIfAnyPalleteIsVisible() == true){
+    app.togglePalettes();
+    }
+}
+
+function showPalettes() {
+    if(CheckIfAnyPalleteIsVisible() == false){
+    app.togglePalettes();
+    }
 }
 
 function CheckIfAnyPalleteIsVisible() {
