@@ -53,7 +53,7 @@ function createFolderIfNotExist(path) {
 
 function openDocument(location) {
     var fileRef = new File(location);
-    app.open(fileRef);
+    return app.open(fileRef);
 }
 
 function getDocumentDimensionsPx(documentIndex) {
@@ -173,6 +173,7 @@ function shadowFromCurrentPreviousAndPinned(obj) {
 
 function saveShadowToFile(payLoadObj) {
     SelectLayer("eSTIN");
+    //save reference to the shadowing document, so we can safely switch back;
     var shadowDocument = documents.getByName(payLoadObj.shadowDocumentName);
     var eSTINLayer = shadowDocument.layers.getByName("eSTIN");
     //store layer status so we can hide it again later after selection
@@ -189,13 +190,51 @@ function saveShadowToFile(payLoadObj) {
     }
     purgeClipboard();
     if (isSelection) {
+        //alert("we have a selection");
         CopySelection();
+        //alert("we have a selection");
     }
     //hide layer again.
     if(isStinVisible == false) {
         hideLayer("eSTIN");
     }
-    var topLayerFilePath = getNameOfLayerStartingWith(payLoadObj.currentFile.prep + "-");
+    var prepDash = payLoadObj.currentFile.prep + "-";
+    var topLayerName = getNameOfLayerStartingWith(prepDash);
+    var topLayerFilePath = topLayerName.substring(topLayerName.indexOf(prepDash) + prepDash.length, topLayerName.length);
+    var topLayerFile = topLayerFilePath.substring(topLayerFilePath.lastIndexOf("/") + 1, topLayerFilePath.length);
+    //reference to the document into which we have to paste the shadow.
+    var targetFile = openDocument(topLayerFilePath);
+    //mark the document as active.
+    app.activeDocument = targetFile;
+    SelectLayer("eSTIN");
+    //check if the layer is visible and force it to be visible
+    var targetESTINvisible = targetFile.layers.getByName("eSTIN").visible;
+
+    if(targetESTINvisible == false) {
+        showLayer("eSTIN");
+    }
+    //then clear the content of the layer so it can accept whatever is coming
+    //alert("about to select all");
+    SelectAllPixels();
+    DeletePixels();
+    //then if we have something to paste, paste it into.
+    if (isSelection) {
+        PasteInPlace();
+        purgeClipboard();
+    }
+    //deselect (paste in place deselects automatically, but if we do not paste...)
+    JachNoMarchingAnts();
+
+    //then set the visibility to back as it were.constructor
+    if(targetESTINvisible == false) {
+        hideLayer("eSTIN");
+    }
+    //then set the file LayerSet to Pavel-upravy??
+    applyLayerComp("pavel-upravy")
+    //then save the file and close it.
+    targetFile.close(SaveOptions.SAVECHANGES);
+    //then restore the shadowing document;
+    app.activeDocument = shadowDocument
 }
 
 function updateLayer(fileObj) {
