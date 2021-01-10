@@ -10,6 +10,7 @@ const shadowDocumentName = "stinovani";
 //current folder in which we work
 let currentWorkingFolder = null;
 let documentDimensions;
+let includePreviousPhase;
 
 function setDocumentDimensions(jsonDimensions) {
     console.log(jsonDimensions);
@@ -67,6 +68,9 @@ sly.init();
 
 //nastavuje "previous" class na policko vedle "active", kdykoliv se active zmeni.
 sly.on('active', properlyMarkPrevious);
+
+//nastavi jestli se vklada predchozi policko
+setIncludePreviousPhase();
 
 function getShadowerStatus() {
     let status = localStorage.getItem("enabled") == "true";
@@ -306,9 +310,13 @@ function createThumbnails() {
 
 ///// - kod pro samotne stinovani -
 
+let isPreview = false;
+
 function openSlideForShadowing() {
+    isPreview = false;
     let $currentSlide = $slides.find(".active");
-    let $previousSlide = $currentSlide.prevAll('li').not(".pinned").first();
+    properlyMarkPrevious();
+    let $previousSlide = $slides.find(".previous");
     let $pinnedSlide = $slides.find('.pinned:not(".active")');
     let currentFilePath = getPSDFilePathFromSlide($currentSlide);
     let previousFilePath = getPSDFilePathFromSlide($previousSlide);
@@ -337,7 +345,7 @@ function openSlideForShadowing() {
     console.log("pinned: " + pinnedFilePath);
     console.log(obj);
 
-    jsx.evalScript(`shadowFromCurrentPreviousAndPinned(${JSON.stringify(obj)})`);
+    jsx.evalScript(`shadowFromCurrentPreviousAndPinned(${JSON.stringify(obj)})`, tryEnablePreviewButton);
 }
 
 //returns path to slide.
@@ -366,7 +374,9 @@ function togglePinned(button) {
 
 function properlyMarkPrevious() {
     $slides.find(".previous").removeClass("previous");
-    $slides.find(".active").prevAll('li').not(".pinned").first().addClass("previous");
+    if(includePreviousPhase == true) {
+        $slides.find(".active").prevAll('li').not(".pinned").first().addClass("previous");
+    }
 }
 
 function tryPopulateSlides(event) {
@@ -389,4 +399,19 @@ function tryPopulateSlides(event) {
         localStorage.setItem('workingFolder', JSON.stringify(currentWorkingFolder));
         populateSlides(filteredFileNames, currentWorkingFolder);
     }
+}
+
+function setIncludePreviousPhase() {
+    includePreviousPhase = $('#includePrevious')[0].checked;
+    properlyMarkPrevious();
+}
+
+function toggleFinalView() {
+    isPreview = !isPreview;
+    jsx.evalScript('toggleFinalPreview('+ isPreview +')')
+}
+
+function tryEnablePreviewButton(json) {
+    $("#shadow-preview")[0].disabled = false;
+    $("#shadow-preview").attr('data-original-title', "Přepnout mezi finální fází se šedivým stínem a červeným náhledem");
 }

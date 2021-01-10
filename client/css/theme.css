@@ -147,3 +147,30 @@ li.pinned.active .static-button {
 }
 
 .tooltip.in{opacity:1!important;}
+
+#tlacitka {
+	display: flex;
+	flex-direction: row;
+}
+
+#tlacitka-left {
+	margin-right: auto;
+	margin-left: 5px;
+}
+
+#tlacitka-right {
+	margin-right: 5px;
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+}
+
+#tlacitka-right > .topcoat-checkbox,
+#tlacitka-left > .topcoat-switch,
+#tlacitka-left > .topcoat-button {
+	margin: auto 0 auto 0;
+}
+
+#tlacitka-right > .topcoat-checkbox {
+	margin-left: 10px;
+}

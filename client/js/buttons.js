@@ -27,6 +27,8 @@ $('#shadowerEnabledSwitch').on("change", function(){
     $('#status').html(this.checked?'callback true':'callback false');
 });
 
+$('#includePrevious').on("click", function() { setIncludePreviousPhase()});
+
 
 $("#openShadower").on("click" , () => jsx.evalScript("loadFiles('explorer')", addFiles));
 
@@ -39,7 +41,7 @@ $("#create-thumbnails").on("click", () => createThumbnails());
 
 $("#working-folder").on("click", () => openFolder());
 
-$("#test").on("click", () => jsx.evalScript("getLayerComps()", console.log));
+$("#shadow-preview").on("click", () => toggleFinalView());
 
 //rescale scrollbar
 $(window).on("resize", () => sly.reload());

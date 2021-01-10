@@ -37,26 +37,36 @@
     </div>
     <hr-->
     <div id="tlacitka">
-      <label title="Vypnout/Zapnout odchytávání fází pro stínování" rel='tooltip' class="topcoat-switch">
-      <input id="shadowerEnabledSwitch" type="checkbox" class="topcoat-switch__input">
-      <div class="topcoat-switch__toggle"></div>
-      </label>
-      <button id="restartExt" class="topcoat-button" title="Zcela restartovat Shadower" rel='tooltip' >Restart</button>
-      <button id="clear-cache" class="topcoat-button" title="Vyčistit persistující soubory" rel='tooltip' >Clear cache</button>
-      <button id="create-thumbnails" class="topcoat-button">Vyrobit náhledy</button>
-      <button id="working-folder" rel='tooltip' tooltip="" class="topcoat-button" disabled>otevřít složku</button>
-      <button id="test" class="topcoat-button" >TEST</button>
+      <div id="tlacitka-left">
+        <label title="Vypnout/Zapnout odchytávání fází pro stínování" rel='tooltip' class="topcoat-switch">
+          <input id="shadowerEnabledSwitch" type="checkbox" class="topcoat-switch__input">
+          <div class="topcoat-switch__toggle"></div>
+        </label>
+        <button id="restartExt" class="topcoat-button" title="Zcela restartovat Shadower" rel='tooltip'>Restart</button>
+        <!-- <button id="clear-cache" class="topcoat-button" title="Vyčistit persistující soubory" rel='tooltip'>Clear
+          cache</button> -->
+        <button id="create-thumbnails" class="topcoat-button"title="Vyrobí náhledy pro fáze / obnoví náhledy" rel='tooltip'>Vyrobit náhledy</button>
+        <button id="working-folder" rel='tooltip' tooltip="Otevře v průzkumníku složku se soubory" class="topcoat-button" disabled>otevřít složku</button>
+      </div>
+      <div id="tlacitka-right">
+        <button id="shadow-preview" tooltip="Přepnout mezi finální fází se šedivým stínem a červeným náhledem" rel='tooltip' class="topcoat-button" disabled>Přepnout náhled</button>
+        <label class="topcoat-checkbox" title="Přidá pod stínovanou fázi předcházející fázi" rel='tooltip'>
+          <input id="includePrevious" type="checkbox" checked>
+          <div class="topcoat-checkbox__checkmark"></div>
+          Podlož minulou fází
+        </label>
+      </div>
     </div>
-  </div>
 
-  <script src="js/libs/CSInterface-4.0.0.js"></script>
-  <script src="js/libs/jquery-2.0.2.min.js"></script>
-  <script src="js/libs/bootstrap.js"></script>
-  <script src="js/libs/sly.js"></script>
-  <script type="text/javascript" src="js/libs/JSX.js"></script>
-  <script src="js/themeManager.js"></script>
-  <script src="js/main.js"></script>
-  <script src="js/buttons.js"></script>
+
+    <script src="js/libs/CSInterface-4.0.0.js"></script>
+    <script src="js/libs/jquery-2.0.2.min.js"></script>
+    <script src="js/libs/bootstrap.js"></script>
+    <script src="js/libs/sly.js"></script>
+    <script type="text/javascript" src="js/libs/JSX.js"></script>
+    <script src="js/themeManager.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/buttons.js"></script>
 
 </body>
 

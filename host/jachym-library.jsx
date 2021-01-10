@@ -372,6 +372,9 @@ function ShowLayer(trueorfalse) {
 
 // Hide
 function setVisibilityByLayerName(visible, layerName) {
+    if(!layerName ||!visible) {
+        return;
+    }
     var desc1 = new ActionDescriptor();
     var list1 = new ActionList();
     var ref1 = new ActionReference();

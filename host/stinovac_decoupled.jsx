@@ -81,6 +81,9 @@ function shadowFromCurrentPreviousAndPinned(obj) {
     //definitely obtain the shadow document (either find it or create it and find it)
     var shadowDocument = getDocumentAtAllCosts(obj);
     app.activeDocument = shadowDocument;
+    //set brush to black!!!
+    ResetSwatches()
+    applyLayerComp("edit-shadows-60");
     //pokud mame pinned vrstvu, tak ji pripnout.
     //alert(JSON.lave(obj));
 
@@ -130,7 +133,7 @@ function shadowFromCurrentPreviousAndPinned(obj) {
     JachNoMarchingAnts();
 
     //smaze historii, aby Pavel a Franta nemohli couvat do akce skriptu.
-    //purgeAllHistory();
+    purgeAllHistory();
 
     //this is a nested function - to be able to access variables of the parent function.
     function getDocumentAtAllCosts(payLoadObj) {
@@ -238,13 +241,14 @@ function saveShadowToFile(payLoadObj) {
 }
 
 function updateLayer(fileObj) {
+    var prepWithDash = fileObj.prep + "-";
     if (fileObj.path) {
-        var prepWithDash = fileObj.prep + "-";
         var layerName = prepWithDash + fileObj.path;
         //pokud najdu vrstvu se stejnym jmenem, tak nebudu nic delat
         if (layerExists(layerName)) {
             //Just make sure the layer is visible.
             LayerVisibility(layerName, true);
+            SelectLayer(layerName);
             OpacityToPercent(fileObj.opacity);
         } else {
             //pokud existuje "nejaka" layer, tak ji chci vybrat a nahradit novou vrstvou
@@ -264,6 +268,7 @@ function updateLayer(fileObj) {
             }
         }
     } else {
+        //alert("chci smazat: " + fileObj.path);
         //pokud existuje "nejaka" layer, tak ji chci odstranit 
         if (selectLayerStartingWith(prepWithDash)) {
             DeleteLayer()
@@ -295,6 +300,20 @@ function getPathOfActiveDocument() {
     return pathOfActiveDocument;
 }
 
-function toggleEstin() {
-
+function toggleFinalPreview(setTo) {
+    if(setTo == false) {
+        //alert("chceme malovat");
+        applyLayerComp("edit-shadows-60");
+        setVisibilityByLayerName(true, getNameOfLayerStartingWith("top-"));
+        setVisibilityByLayerName(true, getNameOfLayerStartingWith("prev-"));
+        setVisibilityByLayerName(true, getNameOfLayerStartingWith("pin-"));
+        purgeAllHistory();
+    } else {
+        //alert("chceme koukat");
+        applyLayerComp("real-shadows-30");
+        setVisibilityByLayerName(true, getNameOfLayerStartingWith("top-"));
+        setVisibilityByLayerName(false, getNameOfLayerStartingWith("prev-"));
+        setVisibilityByLayerName(false, getNameOfLayerStartingWith("pin-"));
+        purgeAllHistory();
+    }
 }
