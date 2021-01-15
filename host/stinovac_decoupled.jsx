@@ -290,16 +290,6 @@ function getLayerComps() {
     return layerComp;
 }
 
-function getPathOfActiveDocument() {
-    var pathOfActiveDocument;
-    try {
-        pathOfActiveDocument = app.activeDocument.path + '/' + app.activeDocument.name;
-    } catch (err) {
-        pathOfActiveDocument = app.activeDocument.name;
-    }
-    return pathOfActiveDocument;
-}
-
 function toggleFinalPreview(setTo) {
     if(setTo == false) {
         //alert("chceme malovat");
@@ -316,4 +306,17 @@ function toggleFinalPreview(setTo) {
         setVisibilityByLayerName(false, getNameOfLayerStartingWith("pin-"));
         purgeAllHistory();
     }
+}
+
+function getPathOfActiveDocument(defaultFileName) {
+    var fileName;
+    try {
+        fileName = app.activeDocument.fullName.fsName;
+    } catch (err) {
+        fileName = app.activeDocument.name;
+        if(fileName.indexOf(defaultFileName) != -1) {
+            fileName = defaultFileName;
+        }
+    }
+    return fileName;
 }

@@ -103,20 +103,25 @@ function isOpenFile(numberOfOpenFiles) {
     console.log(numberOfOpenFiles);
     if(numberOfOpenFiles > 0) {
         //tak zkontroluj jestli je to platna faze
-        jsx.evalScript("app.documents[app.documents.length - 1].path + '/' + app.documents[app.documents.length - 1].name", isValidFileName);
+        jsx.evalScript(`getPathOfActiveDocument('${shadowDocumentName}')`, isValidFileName);
+        jsx.evalScript("app.activeDocument.fullName.fsName", isValidFileName);
+        //jsx.evalScript("app.documents[app.documents.length - 1].path + '/' + app.documents[app.documents.length - 1].name", isValidFileName);
     }
 }
 
 // Má obrázek v názvu slovo "FAZE"? Pokud ano, tak
 function isValidFileName(filePath) {
+    console.log(filePath);
+    filePath = filePath.replace(/\\/g, "/");
     //pokud je otevreny temp soubor shadoweru
+    console.log(filePath);
     if(filePath == shadowDocumentName) {
         //tak asi uz delam shadowing a neni treba delat nove nahledy
         console.log("is the temp file for shadower");
         return;
     }
-    filePath = decodeURI(filePath);
-    console.log(filePath);
+    //filePath = decodeURI(filePath);
+    //console.log(filePath);
     if(filePath.toString().toUpperCase().indexOf("_FAZE_") != -1) {
         let fileName = getFileNameFromESPath(filePath);
         let folderPath = getWinPathFromESPath(filePath);
@@ -146,12 +151,12 @@ function thumbnailsFolderExists(filePath) {
     }
 }
 
-//from '/g/FAZE/filo201_FAZE_055.psd' to 'g:/FAZE'
+//from 'C:/Users/krisn/Desktop/testy/test a ž č/tisk01_FAZE_001.psd' to 'C:/Users/krisn/Desktop/testy/test a ž č/'
 function getWinPathFromESPath(path) {
-    return path.substring(1, path.lastIndexOf("/")).replace("/", ":/");
+    return path.substring(0, path.lastIndexOf("/"));
 }
 
-//from '/g/FAZE/filo201_FAZE_055.psd' to 'filo201_FAZE_055.psd'
+//from 'C:/Users/krisn/Desktop/testy/test a ž č/tisk01_FAZE_001.psd' to 'tisk01_FAZE_001.psd'
 function getFileNameFromESPath(path) {
     return path.substring(path.lastIndexOf("/") + 1, path.length);
 }
@@ -189,7 +194,7 @@ function getActiveDocument() {
     }
     console.log("intercepted activation of a new document");
     //pokud je zrovna aktivovaný obrázek .psd
-    jsx.evalScript("getPathOfActiveDocument()", isValidFileName);
+    jsx.evalScript(`getPathOfActiveDocument('${shadowDocumentName}')`, isValidFileName);
 }
 
 csInterface.addEventListener("documentAfterSave", getSavedDocument);
