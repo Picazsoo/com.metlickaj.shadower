@@ -49,6 +49,9 @@ $(window).on("resize", () => sly.reload());
 //$slides.on("dblclick",() => jsx.evalScript(`openFile("${getPSDFilePathFromSlide()}")`));
 //$slides.on("dblclick",(event) => jsx.evalScript(`openFile("${getPSDFilePathFromEvent(event)}")`));
 $slides.on("dblclick",(event) => openSlideForShadowing(event));
+$("#open-selected").on("click",(event) => openSlideForShadowing(event));
+$("#open-previous").on("click",(event) => openPreviousSlideForShadowing(event));
+$("#open-next").on("click",(event) => openNextSlideForShadowing(event));
 
 
 function getPSDFilePathFromEvent(event) {

@@ -67,7 +67,7 @@ const sly = new Sly('#frame', {
 sly.init();
 
 //nastavuje "previous" class na policko vedle "active", kdykoliv se active zmeni.
-sly.on('active', properlyMarkPrevious);
+sly.on('active', actOnSelectedField);
 
 //nastavi jestli se vklada predchozi policko
 setIncludePreviousPhase();
@@ -350,7 +350,21 @@ function openSlideForShadowing() {
     console.log("pinned: " + pinnedFilePath);
     console.log(obj);
 
-    jsx.evalScript(`shadowFromCurrentPreviousAndPinned(${JSON.stringify(obj)})`, tryEnablePreviewButton);
+    jsx.evalScript(`shadowFromCurrentPreviousAndPinned(${JSON.stringify(obj)})`, doPostOpenActions);
+}
+
+function openPreviousSlideForShadowing() {
+    let $currentSlide = $slides.find(".active");
+    $currentSlide.removeClass("active");
+    $currentSlide.prevAll('li').first().addClass("active");
+    openSlideForShadowing();
+}
+
+function openNextSlideForShadowing() {
+    let $currentSlide = $slides.find(".active");
+    $currentSlide.removeClass("active");
+    $currentSlide.nextAll('li').first().addClass("active");
+    openSlideForShadowing();
 }
 
 //returns path to slide.
@@ -374,6 +388,12 @@ function togglePinned(button) {
         $toggledSlide.addClass("pinned")
     }
     //put "previous" to proper place!
+    properlyMarkPrevious();
+}
+
+function actOnSelectedField() {
+    $("#open-selected")[0].disabled = false;
+    $("#open-selected").attr('data-original-title', "Otevře aktuálně označenou fázi pro stínování");
     properlyMarkPrevious();
 }
 
@@ -416,7 +436,20 @@ function toggleFinalView() {
     jsx.evalScript('toggleFinalPreview('+ isPreview +')')
 }
 
-function tryEnablePreviewButton(json) {
+function doPostOpenActions(json) {
+    enableBackwardForwardButtons();
+    enablePreviewButton();
+}
+
+function enableBackwardForwardButtons() {
+    $("#open-next")[0].disabled = false;
+    $("#open-next").attr('data-original-title', "Přesun na další fázi");
+
+    $("#open-previous")[0].disabled = false;
+    $("#open-previous").attr('data-original-title', "Přesun na předchozí fázi");
+}
+
+function enablePreviewButton(json) {
     $("#shadow-preview")[0].disabled = false;
     $("#shadow-preview").attr('data-original-title', "Přepnout mezi finální fází se šedivým stínem a červeným náhledem");
 }

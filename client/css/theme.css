@@ -174,3 +174,15 @@ li.pinned.active .static-button {
 #tlacitka-right > .topcoat-checkbox {
 	margin-left: 10px;
 }
+
+#tlacitka-middle {
+	margin-right: auto;
+}
+
+#tlacitka i {
+    padding-right: 0.4em;
+}
+
+span.checkbox-text {
+    font-size: small;
+}
