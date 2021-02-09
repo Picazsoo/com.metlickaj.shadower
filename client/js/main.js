@@ -355,15 +355,21 @@ function openSlideForShadowing() {
 
 function openPreviousSlideForShadowing() {
     let $currentSlide = $slides.find(".active");
-    $currentSlide.removeClass("active");
-    $currentSlide.prevAll('li').first().addClass("active");
+    let $previousSlide = $currentSlide.prevAll('li').first();
+    if($previousSlide.length != 0) {
+        $currentSlide.removeClass("active");
+        $previousSlide.addClass("active");
+    }
     openSlideForShadowing();
 }
 
 function openNextSlideForShadowing() {
     let $currentSlide = $slides.find(".active");
-    $currentSlide.removeClass("active");
-    $currentSlide.nextAll('li').first().addClass("active");
+    let $nextSlide = $currentSlide.nextAll('li').first();
+    if($nextSlide.length != 0) {
+        $currentSlide.removeClass("active");
+        $nextSlide.addClass("active");
+    }
     openSlideForShadowing();
 }
 
@@ -394,6 +400,12 @@ function togglePinned(button) {
 function actOnSelectedField() {
     $("#open-selected")[0].disabled = false;
     $("#open-selected").attr('data-original-title', "Otevře aktuálně označenou fázi pro stínování");
+    let $activeSlides = $slides.find(".active");
+    //todo: this is a messy hack to fix the issue when the first slide is selected as "active" by "previous-button" and then when clicking on other slide
+    //this first slide stays active. Here we manually check whether it got stuck and we remove from it manually the class!
+    if($activeSlides.length > 1) {
+        $activeSlides.first().removeClass("active");
+    }
     properlyMarkPrevious();
 }
 
