@@ -1,10 +1,11 @@
-﻿//@include "./jachym-library.jsx"
-//@include "./json.jsx"
+﻿//@include "../../common_library/photoshop_library.jsx"
+
+var alreadyInited = true;
 
 function loadFiles(source) {
     var files = [];
     if (source === 'bridge') {
-        files = GetFilesFromBridge();
+        files = getFilesFromBridge();
     } else {
         files = openDialog();
     }
@@ -21,30 +22,9 @@ function loadFiles(source) {
 
 function openFirstSelectedFile() {
     files = openDialog();
-    if(files.length != 0) {
+    if (files.length != 0) {
         open(files[0]);
     }
-}
-
-function getJpgThumbnail(paramObj) {
-    var psdFolder = paramObj.folder;
-    var psdFileName = paramObj.fileName;
-    var psdFilePath = psdFolder + "/" + psdFileName;
-    var subFolder = paramObj.targetSubfolder;
-    var jpgFilePath = psdFolder + "/" + subFolder + "/" + psdFileName.substring(0, psdFileName.toUpperCase().lastIndexOf(".PSD"));
-    var width = paramObj.width;
-
-    openFile(psdFilePath);
-    createFolderIfNotExist(psdFolder + "/" + subFolder);
-    app.activeDocument.resizeImage(250);
-    var exportOptions = new ExportOptionsSaveForWeb();
-    exportOptions.format = SaveDocumentType.JPEG;
-
-    app.activeDocument.exportDocument(new File(jpgFilePath + ".jpg"), ExportType.SAVEFORWEB, exportOptions);
-    app.activeDocument.close(SaveOptions.DONOTSAVECHANGES);
-    return JSON.lave({
-        thumbnailPath: jpgFilePath + ".jpg"
-    });
 }
 
 function openFile(path) {
@@ -81,7 +61,7 @@ function shadowFromCurrentPreviousAndPinned(obj) {
 
     //This tells us whether the shadowing temp file has already been used for shadowing.
     //If so, we must make sure to save changes done to the eSTIN layer.
-    var alreadyInited = true;
+    alreadyInited = true;
     var widthPx = obj.dimensionsInPx.widthPx;
     var heightPx = obj.dimensionsInPx.heightPx;
     var shadowDocumentName = obj.shadowDocumentName;
@@ -89,13 +69,13 @@ function shadowFromCurrentPreviousAndPinned(obj) {
     var shadowDocument = getDocumentAtAllCosts(obj);
     app.activeDocument = shadowDocument;
     //set brush to black!!!
-    ResetSwatches()
+    resetSwatches()
     applyLayerComp("edit-shadows-60");
     //pokud mame pinned vrstvu, tak ji pripnout.
     //alert(JSON.lave(obj));
 
     //Pokud je alreadyInited = true, tak musime ulozit stin do faze.
-    if(alreadyInited) {
+    if (alreadyInited) {
         saveShadowToFile(obj);
     }
 
@@ -107,14 +87,14 @@ function shadowFromCurrentPreviousAndPinned(obj) {
     //otevri horni vrstvu jako soubor a zkopiruj z ni stin
     //getShadowFromFile(obj);
     var topDocument = app.open(File(obj.currentFile.path));
-    SelectLayer("eSTIN");
+    selectLayers("eSTIN");
     var topDocShadowLayer = topDocument.layers.getByName("eSTIN");
     //store layer status so we can hide it again later after selection
     var isStinVisible = topDocShadowLayer.visible;
-    if(isStinVisible == false) {
-        showLayer("eSTIN");
+    if (isStinVisible == false) {
+        showLayers("eSTIN");
     }
-    selectPixels();
+    setMarqueByTransparency();
     var isSelection;
     try {
         isSelection = topDocument.selection.bounds[0];
@@ -123,75 +103,75 @@ function shadowFromCurrentPreviousAndPinned(obj) {
     }
     purgeClipboard();
     if (isSelection) {
-        CopySelection();
+        copySelection();
     }
     //hide layer again.
-    if(isStinVisible == false) {
-        hideLayer("eSTIN");
+    if (isStinVisible == false) {
+        hideLayers("eSTIN");
     }
     app.activeDocument = shadowDocument;
-    SelectLayer("eSTIN");
-    SelectAllPixels();
-    DeletePixels();
+    selectLayers("eSTIN");
+    selectAllPixels();
+    deleteSelectedPixels();
     if (isSelection) {
-        PasteInPlace();
+        pasteInPlace();
     }
     //deselect (paste in place deselects automatically, but if we do not paste...)
-    JachNoMarchingAnts();
+    deselectMarque();
 
     //smaze historii, aby Pavel a Franta nemohli couvat do akce skriptu.
     purgeAllHistory();
 
-    //this is a nested function - to be able to access variables of the parent function.
-    function getDocumentAtAllCosts(payLoadObj) {
-        var documentName = payLoadObj.shadowDocumentName;
-        var widthPx = payLoadObj.dimensionsInPx.widthPx;
-        var heightPx = payLoadObj.dimensionsInPx.heightPx;
-        var document;
-        try {
-            document = app.documents.getByName(documentName);
-        } catch (err) {
-            //throw down flag
-            alreadyInited = false;
-            CreateNewDocument(documentName, widthPx, heightPx, 300);
-            document = app.documents.getByName(documentName);
-            var layerRef = document.artLayers.add();
-            layerRef.name = payLoadObj.pinnedFile.prep + "Holder";
-            layerRef.allLocked = true;
-            layerRef = document.artLayers.add();
-            layerRef.name = payLoadObj.previousFile.prep + "Holder";
-            layerRef.allLocked = true;
-            layerRef = document.artLayers.add();
-            layerRef.name = payLoadObj.currentFile.prep + "Holder";
-            layerRef.allLocked = true;
-            layerRef = document.artLayers.add();
-            layerRef.name = "shadowHolder";
-            layerRef.allLocked = true;
-            layerRef = document.artLayers.add();
-            layerRef.name = "eSTIN";
-            layerRef.opacity = 30;
-            layerRef.allLocked = false;
-            setColorOverlay(0, 0, 0, 100);
-            createLayerComp("real-shadows-30", "standardni stiny a svetla");
-            layerRef.opacity = 60;
-            setColorOverlay(255, 0, 0, 100);
-            createLayerComp("edit-shadows-60", "stiny a svetla pro upravy");
-        }
-        return document;
+}
+//this is a nested function - to be able to access variables of the parent function.
+function getDocumentAtAllCosts(payLoadObj) {
+    var documentName = payLoadObj.shadowDocumentName;
+    var widthPx = payLoadObj.dimensionsInPx.widthPx;
+    var heightPx = payLoadObj.dimensionsInPx.heightPx;
+    var document;
+    try {
+        document = app.documents.getByName(documentName);
+    } catch (err) {
+        //throw down flag
+        alreadyInited = false;
+        createNewDocument(documentName, widthPx, heightPx, 300);
+        document = app.documents.getByName(documentName);
+        var layerRef = document.artLayers.add();
+        layerRef.name = payLoadObj.pinnedFile.prep + "Holder";
+        layerRef.allLocked = true;
+        layerRef = document.artLayers.add();
+        layerRef.name = payLoadObj.previousFile.prep + "Holder";
+        layerRef.allLocked = true;
+        layerRef = document.artLayers.add();
+        layerRef.name = payLoadObj.currentFile.prep + "Holder";
+        layerRef.allLocked = true;
+        layerRef = document.artLayers.add();
+        layerRef.name = "shadowHolder";
+        layerRef.allLocked = true;
+        layerRef = document.artLayers.add();
+        layerRef.name = "eSTIN";
+        layerRef.opacity = 30;
+        layerRef.allLocked = false;
+        setColorOverlay(0, 0, 0, 100, layerRef.name);
+        createLayerComp("real-shadows-30", "standardni stiny a svetla");
+        layerRef.opacity = 60;
+        setColorOverlay(255, 0, 0, 100, layerRef.name);
+        createLayerComp("edit-shadows-60", "stiny a svetla pro upravy");
     }
+    return document;
 }
 
 function saveShadowToFile(payLoadObj) {
-    SelectLayer("eSTIN");
+    selectLayers("eSTIN");
     //save reference to the shadowing document, so we can safely switch back;
     var shadowDocument = documents.getByName(payLoadObj.shadowDocumentName);
     var eSTINLayer = shadowDocument.layers.getByName("eSTIN");
     //store layer status so we can hide it again later after selection
     var isStinVisible = eSTINLayer.visible;
-    if(isStinVisible == false) {
-        showLayer("eSTIN");
+    if (isStinVisible == false) {
+        showLayers("eSTIN");
     }
-    selectPixels();
+    setMarqueByTransparency();
     var isSelection;
     try {
         isSelection = shadowDocument.selection.bounds[0];
@@ -201,12 +181,12 @@ function saveShadowToFile(payLoadObj) {
     purgeClipboard();
     if (isSelection) {
         //alert("we have a selection");
-        CopySelection();
+        copySelection();
         //alert("we have a selection");
     }
     //hide layer again.
-    if(isStinVisible == false) {
-        hideLayer("eSTIN");
+    if (isStinVisible == false) {
+        hideLayers("eSTIN");
     }
     var prepDash = payLoadObj.currentFile.prep + "-";
     var topLayerName = getNameOfLayerStartingWith(prepDash);
@@ -216,28 +196,28 @@ function saveShadowToFile(payLoadObj) {
     var targetFile = openDocument(topLayerFilePath);
     //mark the document as active.
     app.activeDocument = targetFile;
-    SelectLayer("eSTIN");
+    selectLayers("eSTIN");
     //check if the layer is visible and force it to be visible
     var targetESTINvisible = targetFile.layers.getByName("eSTIN").visible;
 
-    if(targetESTINvisible == false) {
-        showLayer("eSTIN");
+    if (targetESTINvisible == false) {
+        showLayers("eSTIN");
     }
     //then clear the content of the layer so it can accept whatever is coming
     //alert("about to select all");
-    SelectAllPixels();
-    DeletePixels();
+    selectAllPixels();
+    deleteSelectedPixels();
     //then if we have something to paste, paste it into.
     if (isSelection) {
-        PasteInPlace();
+        pasteInPlace();
         purgeClipboard();
     }
     //deselect (paste in place deselects automatically, but if we do not paste...)
-    JachNoMarchingAnts();
+    deselectMarque();
 
     //then set the visibility to back as it were.constructor
-    if(targetESTINvisible == false) {
-        hideLayer("eSTIN");
+    if (targetESTINvisible == false) {
+        hideLayers("eSTIN");
     }
     //then set the file LayerSet to Pavel-upravy??
     applyLayerComp("pavel-upravy")
@@ -254,20 +234,20 @@ function updateLayer(fileObj) {
         //pokud najdu vrstvu se stejnym jmenem, tak nebudu nic delat
         if (layerExists(layerName)) {
             //Just make sure the layer is visible.
-            LayerVisibility(layerName, true);
-            SelectLayer(layerName);
-            OpacityToPercent(fileObj.opacity);
+            showLayers(layerName);
+            selectLayers(layerName);
+            opacityToPercent(fileObj.opacity, layerName);
         } else {
             //pokud existuje "nejaka" layer, tak ji chci vybrat a nahradit novou vrstvou
             if (selectLayerStartingWith(prepWithDash)) {
-                DeleteLayer();
+                deleteLayer();
             }
-            SelectLayer(fileObj.prep + "Holder");
-            SelectAllPixels();
+            selectLayers(fileObj.prep + "Holder");
+            selectAllPixels();
             PlacePSD(fileObj.path);
-            RenameLayer(layerName);
-            OpacityToPercent(fileObj.opacity);
-            ShowLayer(true);
+            renameLayerFromTo(null, layerName);
+            opacityToPercent(fileObj.opacity, layerName);
+            showLayers(layerName);
             if (fileObj.prep == "top") {
                 setSmartObjLayerCompByName("stinovana-faze");
             } else {
@@ -278,7 +258,7 @@ function updateLayer(fileObj) {
         //alert("chci smazat: " + fileObj.path);
         //pokud existuje "nejaka" layer, tak ji chci odstranit 
         if (selectLayerStartingWith(prepWithDash)) {
-            DeleteLayer()
+            deleteLayer()
         }
     }
 }
@@ -298,19 +278,19 @@ function getLayerComps() {
 }
 
 function toggleFinalPreview(setTo) {
-    if(setTo == false) {
+    if (setTo == false) {
         //alert("chceme malovat");
         applyLayerComp("edit-shadows-60");
-        setVisibilityByLayerName(true, getNameOfLayerStartingWith("top-"));
-        setVisibilityByLayerName(true, getNameOfLayerStartingWith("prev-"));
-        setVisibilityByLayerName(true, getNameOfLayerStartingWith("pin-"));
+        showLayers(getNameOfLayerStartingWith("top-"));
+        showLayers(getNameOfLayerStartingWith("prev-"));
+        showLayers(getNameOfLayerStartingWith("pin-"));
         purgeAllHistory();
     } else {
         //alert("chceme koukat");
         applyLayerComp("real-shadows-30");
-        setVisibilityByLayerName(true, getNameOfLayerStartingWith("top-"));
-        setVisibilityByLayerName(false, getNameOfLayerStartingWith("prev-"));
-        setVisibilityByLayerName(false, getNameOfLayerStartingWith("pin-"));
+        showLayers(getNameOfLayerStartingWith("top-"));
+        hideLayers(getNameOfLayerStartingWith("prev-"));
+        hideLayers(getNameOfLayerStartingWith("pin-"));
         purgeAllHistory();
     }
 }
@@ -321,7 +301,7 @@ function getPathOfActiveDocument(defaultFileName) {
         fileName = app.activeDocument.fullName.fsName;
     } catch (err) {
         fileName = app.activeDocument.name;
-        if(fileName.indexOf(defaultFileName) != -1) {
+        if (fileName.indexOf(defaultFileName) != -1) {
             fileName = defaultFileName;
         }
     }

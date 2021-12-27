@@ -357,7 +357,7 @@ function getPSDFilePathFromSlide($slide) {
 //sets the pinned image
 function togglePinned(button) {
     let $pinButton = $(button);
-    $toggledSlide = $pinButton.closest("li");
+    let $toggledSlide = $pinButton.closest("li");
     if ($toggledSlide.hasClass("pinned")) {
         $toggledSlide.removeClass("pinned")
     } else {

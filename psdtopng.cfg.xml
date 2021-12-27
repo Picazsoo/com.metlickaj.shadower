@@ -3,7 +3,7 @@
   <dontWrapJar>false</dontWrapJar>
   <headerType>console</headerType>
   <jar>C:\Users\krisn\AppData\Roaming\Adobe\CEP\extensions\com.metlickaj.shadower\psdtopng.jar</jar>
-  <outfile>C:\Users\krisn\AppData\Roaming\Adobe\CEP\extensions\com.metlickaj.shadower\psdtopng.exe</outfile>
+  <outfile>C:\Users\krisn\AppData\Roaming\Adobe\CEP\extensions\instalace-phaser+shadower\psdtopng.exe</outfile>
   <errTitle></errTitle>
   <cmdLine></cmdLine>
   <chdir>.</chdir>
@@ -15,7 +15,7 @@
   <manifest></manifest>
   <icon></icon>
   <jre>
-    <path>C:\Users\krisn\.jdks\corretto-1.8.0_302\</path>
+    <path>..\corretto-1.8.0_302\</path>
     <bundledJre64Bit>true</bundledJre64Bit>
     <bundledJreAsFallback>false</bundledJreAsFallback>
     <minVersion></minVersion>
