@@ -32,23 +32,17 @@ $('#includePrevious').on("click", function() { setIncludePreviousPhase()});
 
 $("#openShadower").on("click" , () => jsx.evalScript("loadFiles('explorer')", addFiles));
 
-$("#previous-phase").on("click", () => jsx.file("./host/cibule-posun_vzad.jsx"));
-$("#next-phase").on("click", () => jsx.file("./host/cibule-posun_vpred.jsx"));
-
-$("#clear-cache").on("click", () => clearCache());
-
 $("#create-thumbnails").on("click", () => createThumbnails());
 
-$("#working-folder").on("click", () => openFolder());
+// $("#working-folder").on("click", () => openFolder());
+$("#open-file").on("click", () => jsx.evalScript("openFirstSelectedFile()"));
 
 $("#shadow-preview").on("click", () => toggleFinalView());
 
 //rescale scrollbar
 $(window).on("resize", () => sly.reload());
 
-//$slides.on("dblclick",() => jsx.evalScript(`openFile("${getPSDFilePathFromSlide()}")`));
-//$slides.on("dblclick",(event) => jsx.evalScript(`openFile("${getPSDFilePathFromEvent(event)}")`));
-$slides.on("dblclick",(event) => openSlideForShadowing(event));
+$SLIDES.on("dblclick",(event) => openSlideForShadowing(event));
 $("#open-selected").on("click",(event) => openSlideForShadowing(event));
 $("#open-previous").on("click",(event) => openPreviousSlideForShadowing(event));
 $("#open-next").on("click",(event) => openNextSlideForShadowing(event));

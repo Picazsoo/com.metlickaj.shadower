@@ -179,10 +179,23 @@ li.pinned.active .static-button {
 	margin-right: auto;
 }
 
-#tlacitka i {
+button i, checkbox-text i {
     padding-right: 0.4em;
 }
 
 span.checkbox-text {
     font-size: small;
+}
+
+#file-picker {
+	margin: 0;
+    padding: 0;
+    height: 100px;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }

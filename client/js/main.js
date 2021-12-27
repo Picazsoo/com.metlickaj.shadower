@@ -1,35 +1,13 @@
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, regexp: true, indent: 4, maxerr: 50 */
 /*global $, window, location, CSInterface, SystemPath, themeManager*/
 
-//name of folder for storing of thumbnails
-const thumbnailFolderName = ".shadow";
-
-//jmeno temp souboru, ktery drzi aktualni stin a cibule
-const shadowDocumentName = "stinovani";
-
-//current folder in which we work
-let currentWorkingFolder = null;
-let documentDimensions;
-let includePreviousPhase;
-
-function setDocumentDimensions(jsonDimensions) {
-    console.log(jsonDimensions);
-    documentDimensions = JSON.parse(jsonDimensions);
-    console.log("width: " + documentDimensions.widthPx, "height: " + documentDimensions.heightPx);
-}
-
 'use strict';
 jsx.file('./host/stinovac_decoupled.jsx');
-//theme manager to switch between dark mode and light mode
-themeManager.init();
-
-//node.js imports
-const fs = require('fs');
 
 //cs interface used for communication with photoshop
 const csInterface = new CSInterface();
-const path = csInterface.getSystemPath(SystemPath.EXTENSION);
-console.log("the path is " + path);
+const extensionRootPath = csInterface.getSystemPath(SystemPath.EXTENSION);
+console.log("the path is " + extensionRootPath);
 
 //Turn persistence on
 //let event = new CSEvent("com.adobe.PhotoshopPersistent", "APPLICATION");
@@ -38,31 +16,52 @@ const gExtensionId = "com.metlickaj.shadower";
 event.extensionId = gExtensionId;
 csInterface.dispatchEvent(event);
 
+//theme manager to switch between dark mode and light mode
+themeManager.init();
+
+//node.js imports
+const fs = require('fs');
+
+//name of folder for storing of thumbnails
+const THUMBNAIL_FOLDER_NAME = ".shadow";
+
+//jmeno temp souboru, ktery drzi aktualni stin a cibule
+const SHADOW_DOCUMENT_NAME = "stinovani";
+const PSD_TO_PNG_EXE = "psdtopng.exe";
+const THUMBNAILS_WIDTH_PX = 250;
+
 //initialize horizontally scrolling thumbnail list
-const $frame  = $('#frame');
-const $wrap   = $frame.parent();
-const $slides = $('#slides');
-const sly = new Sly('#frame', {
-        horizontal: 1,
-        itemNav: 'basic',
-        smart: 0,
-        activateMiddle: 0,
-        activateOn: 'click',
-        mouseDragging: 1,
-        touchDragging: 1,
-        releaseSwing: 0,
-        scrollBy: 1,
-        scrollBar: $wrap.find('.scrollbar'),
-        speed: 300,
-        elasticBounds: 0,
-        easing: 'swing',
-        dragHandle: 1,
-        dynamicHandle: 1,
-        minHandleSize: 50,
-        clickBar: 1,
-        startAt: 0,
-        syncSpeed: 1,
-        keyboardNavBy: "items"
+const FRAME_ID = "#frame";
+const $WRAP = $(FRAME_ID).parent();
+const $SLIDES = $('#slides');
+const $FILE_PICKER = $('#file-picker');
+//current folder in which we work
+let currentWorkingFolder = null;
+let documentDimensions = null;
+let includePreviousPhase = null;
+let isPreview = false;
+
+const sly = new Sly(FRAME_ID, {
+    horizontal: 1,
+    itemNav: 'basic',
+    smart: 0,
+    activateMiddle: 0,
+    activateOn: 'click',
+    mouseDragging: 1,
+    touchDragging: 1,
+    releaseSwing: 0,
+    scrollBy: 1,
+    scrollBar: $WRAP.find('.scrollbar'),
+    speed: 300,
+    elasticBounds: 0,
+    easing: 'swing',
+    dragHandle: 1,
+    dynamicHandle: 1,
+    minHandleSize: 50,
+    clickBar: 1,
+    startAt: 0,
+    syncSpeed: 1,
+    keyboardNavBy: "items"
 });
 sly.init();
 
@@ -72,6 +71,40 @@ sly.on('active', actOnSelectedField);
 //nastavi jestli se vklada predchozi policko
 setIncludePreviousPhase();
 
+// Po otevření photoshopu - zkontroluje se, jestli je shadower auto-intercept zapnutý.
+//Pokud ano, tak:
+if (getShadowerStatus()) {
+    // Pokud je otevřený obrázek, nebo po otevření libovolného obrázku:
+    jsx.evalScript("app.documents.length", isOpenFile);
+}
+
+// po otevření libovolného obrázku se zkontroluje následující:
+
+// Je ve stejném adresáři jako obrázek adresář ".shadow?
+// Pokud ano, tak se pokusím pro všechny soubory v adresáři načíst .png soubor.
+// Pokud .png soubor existuje, tak porovnám date modified s date modified psd dokumentu.
+// Pokud je .png starší než .psd, tak vytvořím nový .png dokument.
+// Pokud .png soubor neexistuje, tak ho vytvořím.
+
+// Pokud je auto-intercept vypnutý, nic se neděje.
+// Nastavení autointerceptu (po jeho přepnutí) se ukládá do local cache.
+
+//Program entrypoint aktivovaný po "otevření" či "překliknutí" na dokument
+csInterface.addEventListener("documentAfterActivate", getActiveDocument);
+csInterface.addEventListener("documentAfterDeactivate", getActiveDocument);
+
+csInterface.addEventListener("documentAfterSave", getSavedDocument);
+
+//current folder button
+const $sheetButton = $('#working-folder');
+
+
+function setDocumentDimensions(jsonDimensions) {
+    console.log(jsonDimensions);
+    documentDimensions = JSON.parse(jsonDimensions);
+    console.log("width: " + documentDimensions.widthPx, "height: " + documentDimensions.heightPx);
+}
+
 function getShadowerStatus() {
     let status = localStorage.getItem("enabled") == "true";
     $("#shadowerEnabledSwitch").prop("checked", status);
@@ -80,9 +113,9 @@ function getShadowerStatus() {
 }
 
 function setShadowerStatus(isEnabled) {
-    localStorage.setItem("enabled", isEnabled == true ? "true": "");
+    localStorage.setItem("enabled", isEnabled == true ? "true" : "");
     console.log("shadower enabled set to: " + isEnabled);
-    if(getShadowerStatus()) {
+    if (getShadowerStatus()) {
         jsx.evalScript("app.documents.length", isOpenFile);
     } else {
         currentWorkingFolder = null;
@@ -91,74 +124,49 @@ function setShadowerStatus(isEnabled) {
     }
 }
 
-// Po otevření photoshopu - zkontroluje se, jestli je shadower auto-intercept zapnutý.
-//Pokud ano, tak:
-if(getShadowerStatus()) {
-    // Pokud je otevřený obrázek, nebo po otevření libovolného obrázku:
-    jsx.evalScript("app.documents.length", isOpenFile);
-}
-
 function isOpenFile(numberOfOpenFiles) {
     //pokud je otevřený obrázek
-    console.log(numberOfOpenFiles);
-    if(numberOfOpenFiles > 0) {
+    if (numberOfOpenFiles > 0) {
         //tak zkontroluj jestli je to platna faze
-        jsx.evalScript(`getPathOfActiveDocument('${shadowDocumentName}')`, isValidFileName);
-        jsx.evalScript("app.activeDocument.fullName.fsName", isValidFileName);
-        //jsx.evalScript("app.documents[app.documents.length - 1].path + '/' + app.documents[app.documents.length - 1].name", isValidFileName);
+        jsx.evalScript(`getPathOfActiveDocument('${SHADOW_DOCUMENT_NAME}')`, isValidFileName);
+    } else {
+        $WRAP.css('visibility','hidden');
+        $FILE_PICKER.css('visibility','visible');
     }
 }
 
 // Má obrázek v názvu slovo "FAZE"? Pokud ano, tak
 function isValidFileName(filePath) {
-    console.log(filePath);
+    $FILE_PICKER.css('visibility','hidden');
+    $WRAP.css('visibility','visible');
+    console.log("hele :" + filePath);
     filePath = filePath.replace(/\\/g, "/");
     //pokud je otevreny temp soubor shadoweru
     console.log(filePath);
-    if(filePath == shadowDocumentName) {
+    if (filePath == SHADOW_DOCUMENT_NAME) {
         //tak asi uz delam shadowing a neni treba delat nove nahledy
         console.log("is the temp file for shadower");
         return;
     }
-    //filePath = decodeURI(filePath);
-    //console.log(filePath);
-    if(filePath.toString().toUpperCase().indexOf("_FAZE_") != -1) {
-        let fileName = getFileNameFromESPath(filePath);
+    if (filePath.toString().toUpperCase().indexOf("_FAZE_") != -1) {
         let folderPath = getWinPathFromESPath(filePath);
         jsx.evalScript('getDocumentDimensionsPx()', setDocumentDimensions);
-        if(folderPath == currentWorkingFolder) {
+        if (folderPath == currentWorkingFolder) {
             //pokud je folderpath identická s currentWorkingFolder, tak uz mame thumbnails a nic nedelame.
             return;
         }
         //ulož folderPath do pomocné globální proměnné - bude se používat pro kontrolu dalších otevíraných souborů.
         currentWorkingFolder = folderPath;
         //Načíst soubory z adresáře do stínovače.
-        populateSlidesFromWinFolderPath(folderPath);
+        populateSlidesFromWinFolderPath(currentWorkingFolder);
         //Zkontrolovat thumbnails
-        thumbnailsFolderExists(filePath);
-    }
-}
-//zkontroluj, jestli v adresáři souboru existuje adresář pro thumbnails.
-function thumbnailsFolderExists(filePath) {
-    let fileName = getFileNameFromESPath(filePath);
-    let folderPath = getWinPathFromESPath(filePath);
-    console.log("folder: " + folderPath + "; file: " + fileName);
-    //pokud adresar existuje, tak
-    if (fs.existsSync(folderPath + "/" + thumbnailFolderName)) {
-        createThumbnails()
-    } else {
-        //Zeptej se, jestli chce user vytvorit nahledy
+        createThumbnails();
     }
 }
 
 //from 'C:/Users/krisn/Desktop/testy/test a ž č/tisk01_FAZE_001.psd' to 'C:/Users/krisn/Desktop/testy/test a ž č/'
 function getWinPathFromESPath(path) {
     return path.substring(0, path.lastIndexOf("/"));
-}
-
-//from 'C:/Users/krisn/Desktop/testy/test a ž č/tisk01_FAZE_001.psd' to 'tisk01_FAZE_001.psd'
-function getFileNameFromESPath(path) {
-    return path.substring(path.lastIndexOf("/") + 1, path.length);
 }
 
 function populateSlidesFromWinFolderPath(winPath) {
@@ -173,42 +181,23 @@ function populateSlidesFromWinFolderPath(winPath) {
     }
 }
 
-// po otevření libovolného obrázku se zkontroluje následující:
-
-// Je ve stejném adresáři jako obrázek adresář ".shadow?
-// Pokud ano, tak se pokusím pro všechny soubory v adresáři načíst .jpg soubor.
-// Pokud .jpg soubor existuje, tak porovnám date modified s date modified psd dokumentu.
-// Pokud je .jpg starší než .psd, tak vytvořím nový .jpg dokument.
-// Pokud .jpg soubor neexistuje, tak ho vytvořím.
-
-// Pokud je auto-intercept vypnutý, nic se neděje.
-// Nastavení autointerceptu (po jeho přepnutí) se ukládá do local cache.
-
-//Program entrypoint aktivovaný po "otevření" či "překliknutí" na dokument
-csInterface.addEventListener("documentAfterActivate", getActiveDocument);
-
 function getActiveDocument() {
     //pokud je stinovac zapnuty
-    if(!getShadowerStatus()) {
+    if (!getShadowerStatus()) {
         return;
     }
     console.log("intercepted activation of a new document");
     //pokud je zrovna aktivovaný obrázek .psd
-    jsx.evalScript(`getPathOfActiveDocument('${shadowDocumentName}')`, isValidFileName);
+    jsx.evalScript(`getPathOfActiveDocument('${SHADOW_DOCUMENT_NAME}')`, isValidFileName);
 }
-
-csInterface.addEventListener("documentAfterSave", getSavedDocument);
 
 function getSavedDocument(event) {
     //Tady se bude muset obnovovat thumbnail pro ten jeden soubor, co se zrovna uložil.
 }
 
-//current folder button
-const $sheetButton = $('#working-folder');
-
 //vyčistí slides a reloadne je, aby se aktualizoval scrollbar
 function emptySlides() {
-    $slides.empty();
+    $SLIDES.empty();
     sly.reload();
 }
 
@@ -236,13 +225,12 @@ function populateSlides(fileNames, folder) {
             id: stripExtension(fileName),
             title: fileName,
         })
-        .attr("folder", folder)
-        .attr("fileName", fileName)
-        .attr("dateModified", fileInfo.mtime.getTime())
-        .appendTo($slides);
+            .attr("folder", folder)
+            .attr("fileName", fileName)
+            .appendTo($SLIDES);
     });
     sly.reload();
-    if(fileNames.length) {
+    if (fileNames.length) {
         $sheetButton.attr("path", folder);
         $sheetButton.attr('data-original-title', "Otevřít v průzkumníku cestu " + folder);
         $sheetButton.attr('disabled', false);
@@ -253,7 +241,7 @@ function populateSlides(fileNames, folder) {
 
 function openFolder() {
     let pathToDir = $sheetButton.attr("path");
-    pathToDir = windoizePath(pathToDir);
+    pathToDir = pathToWinFormat(pathToDir);
     window.cep.process.createProcess('C:\\Windows\\explorer.exe', pathToDir);
 }
 
@@ -264,7 +252,7 @@ function extractPathFromEvent(event) {
     return xmlData.substring(startOfPath, endOfPath);
 }
 
-function windoizePath(forwardSlashPath) {
+function pathToWinFormat(forwardSlashPath) {
     let newPath = forwardSlashPath.replace(/\//g, "\\");
     return newPath;
 }
@@ -276,58 +264,44 @@ function stripExtension(fileName) {
 function filterFileNames(fileNames) {
     return fileNames.filter((filename) => {
         return filename.toUpperCase().lastIndexOf(".PSD") == filename.length - 4
-        && filename.toUpperCase().indexOf("FAZE") != -1
+            && filename.toUpperCase().indexOf("FAZE") != -1
     });
 }
 
+//Create new thumbnails
 function createThumbnails() {
-    let numOfPictures = $slides.find("li").length;
-    //for each image create a new thumbnail.
-    $slides.find("li").each(function(index, element) {
+    let exec = require('child_process').exec;
+    let pathToProgram = extensionRootPath + "/" + PSD_TO_PNG_EXE;
+    let commandToExec = `"${pathToProgram}" "${pathToWinFormat(currentWorkingFolder)}" "${THUMBNAIL_FOLDER_NAME}" ${THUMBNAILS_WIDTH_PX}`;
+    exec(commandToExec, refreshThumbnails);
+}
+
+function refreshThumbnails() {
+    $SLIDES.find("li").each(function (index, element) {
         let $this = $(element);
-        let folder = $this.attr("folder");
         let fileName = $this.attr("fileName");
-        let dateModified = $this.attr("dateModified");
-        let filePath = folder + "/" + thumbnailFolderName + "/" + stripExtension(fileName) + ".jpg";
-        let obj = {
-            folder: folder,
-            fileName: fileName,
-            width: 250,
-            targetSubfolder: thumbnailFolderName
-        };
-        //Pokud už thumbnail existuje a je novější než psd
-        if(fs.existsSync(filePath) && fs.statSync(filePath).mtime.getTime() > dateModified ) {
-            $this.find("img").attr("src", "file://" + filePath);
-        } else {
-            //vytvoř thumbnail, nebo ho zaktualizuj
-            console.log(filePath + " je moc stary");
-            jsx.evalScript('getJpgThumbnail(' + JSON.stringify(obj) + ')', (returnObj) => {
-                let newFilePath = JSON.parse(returnObj).thumbnailPath;
-                $this.find("img").attr("src", "file://" + newFilePath);
-                if(numOfPictures - 1 == index) {
-                    console.log(currentWorkingFolder);
-                    console.log("trying to store updated html");
-                }
-            });
+        let pngFilePath = getThumbnailFilePath(fileName)
+        if (fs.existsSync(pngFilePath)) {
+            $this.find("img").attr("src", "file://" + pngFilePath + "?" + fs.statSync(pngFilePath).mtime.getTime());
         }
     });
 }
 
-///// - kod pro samotne stinovani -
-
-let isPreview = false;
+function getThumbnailFilePath(psdFileName) {
+    return currentWorkingFolder + "/" + THUMBNAIL_FOLDER_NAME + "/" + stripExtension(psdFileName) + ".png";
+}
 
 function openSlideForShadowing() {
     isPreview = false;
-    let $currentSlide = $slides.find(".active");
+    let $currentSlide = $SLIDES.find(".active");
     properlyMarkPrevious();
-    let $previousSlide = $slides.find(".previous");
-    let $pinnedSlide = $slides.find('.pinned:not(".active")');
+    let $previousSlide = $SLIDES.find(".previous");
+    let $pinnedSlide = $SLIDES.find('.pinned:not(".active")');
     let currentFilePath = getPSDFilePathFromSlide($currentSlide);
     let previousFilePath = getPSDFilePathFromSlide($previousSlide);
     let pinnedFilePath = getPSDFilePathFromSlide($pinnedSlide);
     let obj = {
-        'shadowDocumentName': shadowDocumentName,
+        'shadowDocumentName': SHADOW_DOCUMENT_NAME,
         'currentFile': {
             path: currentFilePath,
             prep: "top",
@@ -348,15 +322,14 @@ function openSlideForShadowing() {
     console.log("current: " + currentFilePath);
     console.log("previous: " + previousFilePath);
     console.log("pinned: " + pinnedFilePath);
-    console.log(obj);
 
     jsx.evalScript(`shadowFromCurrentPreviousAndPinned(${JSON.stringify(obj)})`, doPostOpenActions);
 }
 
 function openPreviousSlideForShadowing() {
-    let $currentSlide = $slides.find(".active");
+    let $currentSlide = $SLIDES.find(".active");
     let $previousSlide = $currentSlide.prevAll('li').first();
-    if($previousSlide.length != 0) {
+    if ($previousSlide.length != 0) {
         $currentSlide.removeClass("active");
         $previousSlide.addClass("active");
     }
@@ -364,9 +337,9 @@ function openPreviousSlideForShadowing() {
 }
 
 function openNextSlideForShadowing() {
-    let $currentSlide = $slides.find(".active");
+    let $currentSlide = $SLIDES.find(".active");
     let $nextSlide = $currentSlide.nextAll('li').first();
-    if($nextSlide.length != 0) {
+    if ($nextSlide.length != 0) {
         $currentSlide.removeClass("active");
         $nextSlide.addClass("active");
     }
@@ -375,22 +348,20 @@ function openNextSlideForShadowing() {
 
 //returns path to slide.
 function getPSDFilePathFromSlide($slide) {
-    if($slide.length) {
+    if ($slide.length) {
         return $slide.attr("folder").toString() + "/" + $slide.attr("fileName").toString();
     }
     return undefined;
 }
 
-//////
-
 //sets the pinned image
 function togglePinned(button) {
     let $pinButton = $(button);
     $toggledSlide = $pinButton.closest("li");
-    if($toggledSlide.hasClass("pinned")) {
+    if ($toggledSlide.hasClass("pinned")) {
         $toggledSlide.removeClass("pinned")
     } else {
-        $slides.find(".pinned").removeClass("pinned");
+        $SLIDES.find(".pinned").removeClass("pinned");
         $toggledSlide.addClass("pinned")
     }
     //put "previous" to proper place!
@@ -400,19 +371,19 @@ function togglePinned(button) {
 function actOnSelectedField() {
     $("#open-selected")[0].disabled = false;
     $("#open-selected").attr('data-original-title', "Otevře aktuálně označenou fázi pro stínování");
-    let $activeSlides = $slides.find(".active");
+    let $activeSlides = $SLIDES.find(".active");
     //todo: this is a messy hack to fix the issue when the first slide is selected as "active" by "previous-button" and then when clicking on other slide
     //this first slide stays active. Here we manually check whether it got stuck and we remove from it manually the class!
-    if($activeSlides.length > 1) {
+    if ($activeSlides.length > 1) {
         $activeSlides.first().removeClass("active");
     }
     properlyMarkPrevious();
 }
 
 function properlyMarkPrevious() {
-    $slides.find(".previous").removeClass("previous");
-    if(includePreviousPhase == true) {
-        $slides.find(".active").prevAll('li').not(".pinned").first().addClass("previous");
+    $SLIDES.find(".previous").removeClass("previous");
+    if (includePreviousPhase == true) {
+        $SLIDES.find(".active").prevAll('li').not(".pinned").first().addClass("previous");
     }
 }
 
@@ -420,7 +391,7 @@ function tryPopulateSlides(event) {
     let filePath = extractPathFromEvent(event);
     currentWorkingFolder = filePath.substring(0, filePath.lastIndexOf("/"));
     // Try to fill the slides if empty.
-    if($slides.children().length != 0) {
+    if ($SLIDES.children().length != 0) {
         return;
     }
     //extract files existing in the folder.
@@ -445,12 +416,14 @@ function setIncludePreviousPhase() {
 
 function toggleFinalView() {
     isPreview = !isPreview;
-    jsx.evalScript('toggleFinalPreview('+ isPreview +')')
+    jsx.evalScript('toggleFinalPreview(' + isPreview + ')')
 }
 
 function doPostOpenActions(json) {
+    console.log("doing post-open shit");
     enableBackwardForwardButtons();
     enablePreviewButton();
+    createThumbnails();
 }
 
 function enableBackwardForwardButtons() {

@@ -19,6 +19,13 @@ function loadFiles(source) {
     return JSON.lave(filesWithPaths);
 }
 
+function openFirstSelectedFile() {
+    files = openDialog();
+    if(files.length != 0) {
+        open(files[0]);
+    }
+}
+
 function getJpgThumbnail(paramObj) {
     var psdFolder = paramObj.folder;
     var psdFileName = paramObj.fileName;

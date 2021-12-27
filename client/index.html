@@ -13,15 +13,6 @@
 <body>
 
   <div id="container">
-    <!--hr>
-    <div class="topcoat-button-bar">
-      <div class="topcoat-button-bar__item">
-        <button id="previous-phase" class="topcoat-button-bar__button--large">&#9664; Předchozí</button>
-      </div>
-      <div class="topcoat-button-bar__item">
-        <button id="next-phase" class="topcoat-button-bar__button--large">Další &#9654;</button>
-      </div>
-    </div-->
     <div id="wrap">
       <div id="frame" class="frame">
         <ul id="slides" class="slidee">
@@ -31,30 +22,33 @@
         <div class="handle"></div>
       </div>
     </div>
-    <!--div class="flex-container">
-      <button id="openShadower" class="topcoat-button">Otevri cibulak</button>
-      <select id="sheets" style="width: 80%;" multiple size="10"></select>
+    <div id="file-picker">
+      <button id="open-file" rel='tooltip' tooltip="Otevři fázi pro stínování" class="topcoat-button"><i class="fas fa-folder-open"></i>Otevři fázi pro stínování</button>
     </div>
-    <hr-->
     <div id="tlacitka">
       <div id="tlacitka-left">
         <label title="Vypnout/Zapnout odchytávání fází pro stínování" rel='tooltip' class="topcoat-switch">
           <input id="shadowerEnabledSwitch" type="checkbox" class="topcoat-switch__input">
           <div class="topcoat-switch__toggle"></div>
         </label>
-        <button id="restartExt" class="topcoat-button" title="Zcela restartovat Shadower" rel='tooltip'><i class="fas fa-redo-alt"></i>Restart</button>
-        <!-- <button id="clear-cache" class="topcoat-button" title="Vyčistit persistující soubory" rel='tooltip'>Clear
-          cache</button> -->
-        <button id="create-thumbnails" class="topcoat-button"title="Vyrobí náhledy pro fáze / obnoví náhledy" rel='tooltip'><i class="fas fa-file-image"></i>Vyrobit náhledy</button>
-        <button id="working-folder" rel='tooltip' tooltip="Otevře v průzkumníku složku se soubory" class="topcoat-button" disabled><i class="fas fa-folder-open"></i>Otevřít složku</button>
+        <button id="restartExt" class="topcoat-button" title="Zcela restartovat Shadower" rel='tooltip'><i
+            class="fas fa-redo-alt"></i>Restart</button>
+        <button id="create-thumbnails" class="topcoat-button" title="Vyrobí náhledy pro fáze / obnoví náhledy"
+          rel='tooltip'><i class="fas fa-file-image"></i>Vyrobit náhledy</button>
+        <!-- <button id="working-folder" rel='tooltip' tooltip="Otevře v průzkumníku složku se soubory"
+          class="topcoat-button" disabled><i class="fas fa-folder-open"></i>Otevřít složku</button> -->
       </div>
       <div id="tlacitka-middle">
-        <button id="open-previous" rel='tooltip' tooltip="Přesun na předchozí fázi" class="topcoat-button" disabled><i class="fas fa-arrow-left"></i>Stinovat předchozí</button>
-        <button id="open-selected" rel='tooltip' tooltip="Otevře aktuálně označenou fázi pro stínování" class="topcoat-button" disabled><i class="fas fa-pencil-alt"></i>Stínovat fázi</button>
-        <button id="open-next" rel='tooltip' tooltip="Přesun na další fázi" class="topcoat-button" disabled><i class="fas fa-arrow-right"></i>Stínovat následující</button>
+        <button id="open-previous" rel='tooltip' tooltip="Přesun na předchozí fázi" class="topcoat-button" disabled><i
+            class="fas fa-arrow-left"></i>Stinovat předchozí</button>
+        <button id="open-selected" rel='tooltip' tooltip="Otevře aktuálně označenou fázi pro stínování"
+          class="topcoat-button" disabled><i class="fas fa-pencil-alt"></i>Stínovat fázi</button>
+        <button id="open-next" rel='tooltip' tooltip="Přesun na další fázi" class="topcoat-button" disabled><i
+            class="fas fa-arrow-right"></i>Stínovat následující</button>
       </div>
       <div id="tlacitka-right">
-        <button id="shadow-preview" tooltip="Přepnout mezi finální fází se šedivým stínem a červeným náhledem" rel='tooltip' class="topcoat-button" disabled><i class="fas fa-low-vision"></i>Přepnout náhled</button>
+        <button id="shadow-preview" tooltip="Přepnout mezi finální fází se šedivým stínem a červeným náhledem"
+          rel='tooltip' class="topcoat-button" disabled><i class="fas fa-low-vision"></i>Přepnout náhled</button>
         <label class="topcoat-checkbox" title="Přidá pod stínovanou fázi předcházející fázi" rel='tooltip'>
           <span class="checkbox-text"><i class="fas fa-layer-group"></i>Podlož minulou fází</span>
           <input id="includePrevious" type="checkbox" checked>
