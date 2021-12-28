@@ -21,6 +21,7 @@ themeManager.init();
 
 //node.js imports
 const fs = require('fs');
+const os = require('os');
 
 //name of folder for storing of thumbnails
 const THUMBNAIL_FOLDER_NAME = ".shadow";
@@ -29,6 +30,8 @@ const THUMBNAIL_FOLDER_NAME = ".shadow";
 const SHADOW_DOCUMENT_NAME = "stinovani";
 const PSD_TO_PNG_EXE = "psdtopng.exe";
 const THUMBNAILS_WIDTH_PX = 250;
+const CONVERSION_THREADS = Math.max((os.cpus().length / 2) - 1, 1);
+console.log(`Will use only ${CONVERSION_THREADS} threads for conversion`);
 
 //initialize horizontally scrolling thumbnail list
 const FRAME_ID = "#frame";
@@ -40,6 +43,8 @@ let currentWorkingFolder = null;
 let documentDimensions = null;
 let includePreviousPhase = null;
 let isPreview = false;
+
+let taskToGenerateThumbnails = null;
 
 const sly = new Sly(FRAME_ID, {
     horizontal: 1,
@@ -130,15 +135,15 @@ function isOpenFile(numberOfOpenFiles) {
         //tak zkontroluj jestli je to platna faze
         jsx.evalScript(`getPathOfActiveDocument('${SHADOW_DOCUMENT_NAME}')`, isValidFileName);
     } else {
-        $WRAP.css('visibility','hidden');
-        $FILE_PICKER.css('visibility','visible');
+        $WRAP.css('visibility', 'hidden');
+        $FILE_PICKER.css('visibility', 'visible');
     }
 }
 
 // Má obrázek v názvu slovo "FAZE"? Pokud ano, tak
 function isValidFileName(filePath) {
-    $FILE_PICKER.css('visibility','hidden');
-    $WRAP.css('visibility','visible');
+    $FILE_PICKER.css('visibility', 'hidden');
+    $WRAP.css('visibility', 'visible');
     console.log("hele :" + filePath);
     filePath = filePath.replace(/\\/g, "/");
     //pokud je otevreny temp soubor shadoweru
@@ -272,11 +277,25 @@ function filterFileNames(fileNames) {
 function createThumbnails() {
     let exec = require('child_process').exec;
     let pathToProgram = extensionRootPath + "/" + PSD_TO_PNG_EXE;
-    let commandToExec = `"${pathToProgram}" "${pathToWinFormat(currentWorkingFolder)}" "${THUMBNAIL_FOLDER_NAME}" ${THUMBNAILS_WIDTH_PX}`;
-    exec(commandToExec, refreshThumbnails);
+    let commandToExec = `"${pathToProgram}" "${pathToWinFormat(currentWorkingFolder)}" "${THUMBNAIL_FOLDER_NAME}" ${THUMBNAILS_WIDTH_PX} ${CONVERSION_THREADS}`;
+    if (taskToGenerateThumbnails != null) {
+        console.log("already generating thumbnails");
+        return;
+    }
+    taskToGenerateThumbnails = setInterval(refreshThumbnails, 1000);
+    exec(commandToExec,
+        (error, stdout, stderr) => {
+            console.log(error);
+            console.log(stdout);
+            console.log(stderr);
+            clearInterval(taskToGenerateThumbnails);
+            taskToGenerateThumbnails = null;
+            refreshThumbnails();
+        });
 }
 
 function refreshThumbnails() {
+    console.log("Refreshing thumbnails");
     $SLIDES.find("li").each(function (index, element) {
         let $this = $(element);
         let fileName = $this.attr("fileName");
@@ -383,7 +402,7 @@ function actOnSelectedField() {
 function properlyMarkPrevious() {
     $SLIDES.find(".previous").removeClass("previous");
     if (includePreviousPhase == true) {
-        $SLIDES.find(".active").prevAll('li').not(".pinned").first().addClass("previous");
+        $SLIDES.find(".active").prevAll('li').first().addClass("previous");
     }
 }
 

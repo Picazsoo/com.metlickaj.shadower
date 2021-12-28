@@ -2,7 +2,7 @@
 <launch4jConfig>
   <dontWrapJar>false</dontWrapJar>
   <headerType>console</headerType>
-  <jar>C:\Users\krisn\AppData\Roaming\Adobe\CEP\extensions\com.metlickaj.shadower\psdtopng.jar</jar>
+  <jar>C:\Users\krisn\AppData\Roaming\Adobe\CEP\extensions\com.metlickaj.shadower\PsdToJpg-1.0-SNAPSHOT-jar-with-dependencies.jar</jar>
   <outfile>C:\Users\krisn\AppData\Roaming\Adobe\CEP\extensions\instalace-phaser+shadower\psdtopng.exe</outfile>
   <errTitle></errTitle>
   <cmdLine></cmdLine>
