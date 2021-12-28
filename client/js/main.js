@@ -125,7 +125,6 @@ function setShadowerStatus(isEnabled) {
     } else {
         currentWorkingFolder = null;
         emptySlides();
-        $sheetButton.attr("disabled", true);
     }
 }
 
@@ -235,19 +234,6 @@ function populateSlides(fileNames, folder) {
             .appendTo($SLIDES);
     });
     sly.reload();
-    if (fileNames.length) {
-        $sheetButton.attr("path", folder);
-        $sheetButton.attr('data-original-title', "Otevřít v průzkumníku cestu " + folder);
-        $sheetButton.attr('disabled', false);
-    } else {
-        $sheetButton.attr('disabled', true);
-    }
-}
-
-function openFolder() {
-    let pathToDir = $sheetButton.attr("path");
-    pathToDir = pathToWinFormat(pathToDir);
-    window.cep.process.createProcess('C:\\Windows\\explorer.exe', pathToDir);
 }
 
 function extractPathFromEvent(event) {
@@ -319,6 +305,10 @@ function openSlideForShadowing() {
     let currentFilePath = getPSDFilePathFromSlide($currentSlide);
     let previousFilePath = getPSDFilePathFromSlide($previousSlide);
     let pinnedFilePath = getPSDFilePathFromSlide($pinnedSlide);
+    //In case pinned and previous overlap, we want only previous
+    if(pinnedFilePath == previousFilePath) {
+        pinnedFilePath = undefined;
+    }
     let obj = {
         'shadowDocumentName': SHADOW_DOCUMENT_NAME,
         'currentFile': {
