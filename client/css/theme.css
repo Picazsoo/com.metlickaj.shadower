@@ -14,10 +14,188 @@ h3 {
 }
 
 #container {
-	width: 80%;
-	margin: 20px auto;
+	margin: 5px 5px 5px 5px;
 }
 
 .switch {
 	margin: 10px;
+}
+
+#link-to-working-folder {
+    color: white;
+}
+
+#image-test {
+	height: 100px;
+}
+
+#wrap {
+	position: relative;
+	margin-bottom: 5px;
+}
+
+.frame {
+	width: 100%;
+	margin-bottom: 5px;
+	padding: 0;
+	overflow-y: show;
+}
+
+.frame .slidee {
+	margin: 0;
+	padding: 0;
+	height: 100px;
+	list-style: none;
+}
+
+.frame .slidee::after {
+	clear: both;
+	content: "";
+	display: block;
+}
+
+.frame .slidee li {
+	float: left;
+	margin: 0 4px 0 0;
+	padding: 0;
+	height: 100%;
+}
+
+.frame .slidee li.active div.slideframe {
+	background: #2680eb;
+}
+
+.frame .slidee li.previous div.slideframe {
+	background: #788ba2;
+}
+
+.frame .slidee li.pinned div.slideframe {
+	background: #4017b1;
+}
+
+.frame .slidee li.pinned.active div {
+	background: transparent;
+}
+
+.frame .slidee li.pinned.active div.slideframe {
+	background-image: linear-gradient(135deg, #2680eb 25%, #4017b1 25%, #4017b1 50%, #2680eb 50%, #2680eb 75%, #4017b1 75%, #4017b1 100%);
+	background-size: 28px 28px;
+}
+
+.scrollbar {
+	width: 100%;
+	height: 12px;
+	padding: 0;
+	background-color: #4a4a4a;
+}
+
+.scrollbar .handle {
+	width: 100px; /* overriden if dynamicHandle: 1 */
+	height: 100%;
+	background: #696969;
+	border: #4a4a4a 1px solid;
+    box-sizing: border-box;
+}
+
+.slideframe {
+	display: flex;
+	flex-direction: column;
+  }
+  
+  .imageholder {
+	height: 71px;
+	background: #4a4a4a;
+	margin: 4px;
+	position: relative;
+  }
+
+  .imageholder > img {
+	width: 112px;
+  }
+  
+  .filename {
+    height: 20px;
+    font-size: 12px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+	white-space: nowrap;
+	width: 112px;
+	margin: 0 4px 0 4px;
+	direction: rtl;
+  }
+
+  .static-button {
+	visibility: hidden;
+    position: absolute;
+    left: 5px;
+	top: 5px;
+}
+
+li.active .static-button {
+	visibility: visible;
+	opacity: 0.5;
+}
+
+li.pinned .static-button {
+	visibility: visible;
+	opacity: 1.0;
+}
+
+li.pinned.active .static-button {
+	visibility: visible;
+	opacity: 1.0;
+}
+
+.tooltip.in{opacity:1!important;}
+
+#tlacitka {
+	display: flex;
+	flex-direction: row;
+}
+
+#tlacitka-left {
+	margin-right: auto;
+	margin-left: 5px;
+}
+
+#tlacitka-right {
+	margin-right: 5px;
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+}
+
+#tlacitka-right > .topcoat-checkbox,
+#tlacitka-left > .topcoat-switch,
+#tlacitka-left > .topcoat-button {
+	margin: auto 0 auto 0;
+}
+
+#tlacitka-right > .topcoat-checkbox {
+	margin-left: 10px;
+}
+
+#tlacitka-middle {
+	margin-right: auto;
+}
+
+button i, checkbox-text i {
+    padding-right: 0.4em;
+}
+
+span.checkbox-text {
+    font-size: small;
+}
+
+#file-picker {
+	margin: 0;
+    padding: 0;
+    height: 100px;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }

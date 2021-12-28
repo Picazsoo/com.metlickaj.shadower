@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<ExtensionManifest Version="4.0" ExtensionBundleId="com.metlickaj.shadower" ExtensionBundleVersion="1.0.0"
+<ExtensionManifest Version="7.0" ExtensionBundleId="com.metlickaj.shadower" ExtensionBundleVersion="1.0.0"
 		ExtensionBundleName="Shadower" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<ExtensionList>
 		<Extension Id="com.metlickaj.shadower" Version="1.0" />
@@ -13,7 +13,7 @@
 			<Locale Code="All" />
 		</LocaleList>
 		<RequiredRuntimeList>
-			<RequiredRuntime Name="CSXS" Version="4.0" />
+			<RequiredRuntime Name="CSXS" Version="7.0" />
 		</RequiredRuntimeList>
 	</ExecutionEnvironment>
 	<DispatchInfoList>
@@ -22,6 +22,10 @@
 				<Resources>
 				<MainPath>./client/index.html</MainPath>
 				<!--ScriptPath>./host/hostscript.jsx</ScriptPath-->
+					<CEFCommandLine>
+						<Parameter>--enable-nodejs</Parameter>
+						<Parameter>--mixed-context</Parameter>
+					</CEFCommandLine>
 				</Resources>
 				<Lifecycle>
 					<AutoVisible>true</AutoVisible>
@@ -31,17 +35,17 @@
 					<Menu>Shadower</Menu>
 					<Geometry>
 						<Size>
-							<Height>700</Height>
-							<Width>300</Width>							
+							<Height>157</Height>
+							<Width>875</Width>							
 						</Size>
-						<!-- <MaxSize>
-							<Height></Height>
-							<Width></Width>
+						<MaxSize>
+							<Height>175</Height>
+							<Width>4000</Width>
 						</MaxSize>
 						<MinSize>
-							<Height></Height>
-							<Width></Width>
-						</MinSize> -->						
+							<Height>157</Height>
+							<Width>625</Width>
+						</MinSize>						
 					</Geometry>
 				</UI>
 			</DispatchInfo>
