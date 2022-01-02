@@ -58,70 +58,72 @@ function getDocumentDimensionsPx(documentIndex) {
 }
 
 function shadowFromCurrentPreviousAndPinned(obj) {
-
-    //This tells us whether the shadowing temp file has already been used for shadowing.
-    //If so, we must make sure to save changes done to the eSTIN layer.
-    alreadyInited = true;
-    var widthPx = obj.dimensionsInPx.widthPx;
-    var heightPx = obj.dimensionsInPx.heightPx;
-    var shadowDocumentName = obj.shadowDocumentName;
-    //definitely obtain the shadow document (either find it or create it and find it)
-    var shadowDocument = getDocumentAtAllCosts(obj);
-    app.activeDocument = shadowDocument;
-    //set brush to black!!!
-    resetSwatches()
-    applyLayerComp("edit-shadows-60");
-    //pokud mame pinned vrstvu, tak ji pripnout.
-    //alert(JSON.lave(obj));
-
-    //Pokud je alreadyInited = true, tak musime ulozit stin do faze.
-    if (alreadyInited) {
-        saveShadowToFile(obj);
-    }
-
-    //
-    updateLayer(obj.pinnedFile);
-    updateLayer(obj.previousFile);
-    updateLayer(obj.currentFile);
-
-    //otevri horni vrstvu jako soubor a zkopiruj z ni stin
-    //getShadowFromFile(obj);
-    var topDocument = app.open(File(obj.currentFile.path));
-    selectLayers("eSTIN");
-    var topDocShadowLayer = topDocument.layers.getByName("eSTIN");
-    //store layer status so we can hide it again later after selection
-    var isStinVisible = topDocShadowLayer.visible;
-    if (isStinVisible == false) {
-        showLayers("eSTIN");
-    }
-    setMarqueByTransparency();
-    var isSelection;
     try {
-        isSelection = topDocument.selection.bounds[0];
-    } catch (err) {
-        isSelection = null;
-    }
-    purgeClipboard();
-    if (isSelection) {
-        copySelection();
-    }
-    //hide layer again.
-    if (isStinVisible == false) {
-        hideLayers("eSTIN");
-    }
-    app.activeDocument = shadowDocument;
-    selectLayers("eSTIN");
-    selectAllPixels();
-    deleteSelectedPixels();
-    if (isSelection) {
-        pasteInPlace();
-    }
-    //deselect (paste in place deselects automatically, but if we do not paste...)
-    deselectMarque();
+        //This tells us whether the shadowing temp file has already been used for shadowing.
+        //If so, we must make sure to save changes done to the eSTIN layer.
+        alreadyInited = true;
+        var widthPx = obj.dimensionsInPx.widthPx;
+        var heightPx = obj.dimensionsInPx.heightPx;
+        var shadowDocumentName = obj.shadowDocumentName;
+        //definitely obtain the shadow document (either find it or create it and find it)
+        var shadowDocument = getDocumentAtAllCosts(obj);
+        app.activeDocument = shadowDocument;
+        //set brush to black!!!
+        resetSwatches()
+        applyLayerComp("edit-shadows-60");
+        //pokud mame pinned vrstvu, tak ji pripnout.
+        //alert(JSON.lave(obj));
 
-    //smaze historii, aby Pavel a Franta nemohli couvat do akce skriptu.
-    purgeAllHistory();
+        //Pokud je alreadyInited = true, tak musime ulozit stin do faze.
+        if (alreadyInited) {
+            saveShadowToFile(obj);
+        }
 
+        //
+        updateLayer(obj.pinnedFile);
+        updateLayer(obj.previousFile);
+        updateLayer(obj.currentFile);
+
+        //otevri horni vrstvu jako soubor a zkopiruj z ni stin
+        //getShadowFromFile(obj);
+        var topDocument = app.open(File(obj.currentFile.path));
+        selectLayers("eSTIN");
+        var topDocShadowLayer = topDocument.layers.getByName("eSTIN");
+        //store layer status so we can hide it again later after selection
+        var isStinVisible = topDocShadowLayer.visible;
+        if (isStinVisible == false) {
+            showLayers("eSTIN");
+        }
+        setMarqueByTransparency();
+        var isSelection;
+        try {
+            isSelection = topDocument.selection.bounds[0];
+        } catch (err) {
+            isSelection = null;
+        }
+        purgeClipboard();
+        if (isSelection) {
+            copySelection();
+        }
+        //hide layer again.
+        if (isStinVisible == false) {
+            hideLayers("eSTIN");
+        }
+        app.activeDocument = shadowDocument;
+        selectLayers("eSTIN");
+        selectAllPixels();
+        deleteSelectedPixels();
+        if (isSelection) {
+            pasteInPlace();
+        }
+        //deselect (paste in place deselects automatically, but if we do not paste...)
+        deselectMarque();
+
+        //smaze historii, aby Pavel a Franta nemohli couvat do akce skriptu.
+        purgeAllHistory();
+    } catch (error) {
+        alert(error);
+    }
 }
 //this is a nested function - to be able to access variables of the parent function.
 function getDocumentAtAllCosts(payLoadObj) {
@@ -152,79 +154,83 @@ function getDocumentAtAllCosts(payLoadObj) {
         layerRef.name = "eSTIN";
         layerRef.opacity = 30;
         layerRef.allLocked = false;
-        setColorOverlay(0, 0, 0, 100, layerRef.name);
+        setColorOverlay(rgbColorFactory(0, 0, 0), 100, layerRef.name);
         createLayerComp("real-shadows-30", "standardni stiny a svetla");
         layerRef.opacity = 60;
-        setColorOverlay(255, 0, 0, 100, layerRef.name);
+        setColorOverlay(rgbColorFactory(255, 0, 0), 100, layerRef.name);
         createLayerComp("edit-shadows-60", "stiny a svetla pro upravy");
     }
     return document;
 }
 
 function saveShadowToFile(payLoadObj) {
-    selectLayers("eSTIN");
-    //save reference to the shadowing document, so we can safely switch back;
-    var shadowDocument = documents.getByName(payLoadObj.shadowDocumentName);
-    var eSTINLayer = shadowDocument.layers.getByName("eSTIN");
-    //store layer status so we can hide it again later after selection
-    var isStinVisible = eSTINLayer.visible;
-    if (isStinVisible == false) {
-        showLayers("eSTIN");
-    }
-    setMarqueByTransparency();
-    var isSelection;
     try {
-        isSelection = shadowDocument.selection.bounds[0];
-    } catch (err) {
-        isSelection = null;
-    }
-    purgeClipboard();
-    if (isSelection) {
-        //alert("we have a selection");
-        copySelection();
-        //alert("we have a selection");
-    }
-    //hide layer again.
-    if (isStinVisible == false) {
-        hideLayers("eSTIN");
-    }
-    var prepDash = payLoadObj.currentFile.prep + "-";
-    var topLayerName = getNameOfLayerStartingWith(prepDash);
-    var topLayerFilePath = topLayerName.substring(topLayerName.indexOf(prepDash) + prepDash.length, topLayerName.length);
-    var topLayerFile = topLayerFilePath.substring(topLayerFilePath.lastIndexOf("/") + 1, topLayerFilePath.length);
-    //reference to the document into which we have to paste the shadow.
-    var targetFile = openDocument(topLayerFilePath);
-    //mark the document as active.
-    app.activeDocument = targetFile;
-    selectLayers("eSTIN");
-    //check if the layer is visible and force it to be visible
-    var targetESTINvisible = targetFile.layers.getByName("eSTIN").visible;
-
-    if (targetESTINvisible == false) {
-        showLayers("eSTIN");
-    }
-    //then clear the content of the layer so it can accept whatever is coming
-    //alert("about to select all");
-    selectAllPixels();
-    deleteSelectedPixels();
-    //then if we have something to paste, paste it into.
-    if (isSelection) {
-        pasteInPlace();
+        selectLayers("eSTIN");
+        //save reference to the shadowing document, so we can safely switch back;
+        var shadowDocument = documents.getByName(payLoadObj.shadowDocumentName);
+        var eSTINLayer = shadowDocument.layers.getByName("eSTIN");
+        //store layer status so we can hide it again later after selection
+        var isStinVisible = eSTINLayer.visible;
+        if (isStinVisible == false) {
+            showLayers("eSTIN");
+        }
+        setMarqueByTransparency();
+        var isSelection;
+        try {
+            isSelection = shadowDocument.selection.bounds[0];
+        } catch (err) {
+            isSelection = null;
+        }
         purgeClipboard();
-    }
-    //deselect (paste in place deselects automatically, but if we do not paste...)
-    deselectMarque();
+        if (isSelection) {
+            //alert("we have a selection");
+            copySelection();
+            //alert("we have a selection");
+        }
+        //hide layer again.
+        if (isStinVisible == false) {
+            hideLayers("eSTIN");
+        }
+        var prepDash = payLoadObj.currentFile.prep + "-";
+        var topLayerName = getNameOfLayerStartingWith(prepDash);
+        var topLayerFilePath = topLayerName.substring(topLayerName.indexOf(prepDash) + prepDash.length, topLayerName.length);
+        var topLayerFile = topLayerFilePath.substring(topLayerFilePath.lastIndexOf("/") + 1, topLayerFilePath.length);
+        //reference to the document into which we have to paste the shadow.
+        var targetFile = openDocument(topLayerFilePath);
+        //mark the document as active.
+        app.activeDocument = targetFile;
+        selectLayers("eSTIN");
+        //check if the layer is visible and force it to be visible
+        var targetESTINvisible = targetFile.layers.getByName("eSTIN").visible;
 
-    //then set the visibility to back as it were.constructor
-    if (targetESTINvisible == false) {
-        hideLayers("eSTIN");
+        if (targetESTINvisible == false) {
+            showLayers("eSTIN");
+        }
+        //then clear the content of the layer so it can accept whatever is coming
+        //alert("about to select all");
+        selectAllPixels();
+        deleteSelectedPixels();
+        //then if we have something to paste, paste it into.
+        if (isSelection) {
+            pasteInPlace();
+            purgeClipboard();
+        }
+        //deselect (paste in place deselects automatically, but if we do not paste...)
+        deselectMarque();
+
+        //then set the visibility to back as it were.constructor
+        if (targetESTINvisible == false) {
+            hideLayers("eSTIN");
+        }
+        //then set the file LayerSet to Pavel-upravy??
+        applyLayerComp("pavel-upravy")
+        //then save the file and close it.
+        targetFile.close(SaveOptions.SAVECHANGES);
+        //then restore the shadowing document;
+        app.activeDocument = shadowDocument
+    } catch (error) {
+        alert(error);
     }
-    //then set the file LayerSet to Pavel-upravy??
-    applyLayerComp("pavel-upravy")
-    //then save the file and close it.
-    targetFile.close(SaveOptions.SAVECHANGES);
-    //then restore the shadowing document;
-    app.activeDocument = shadowDocument
 }
 
 function updateLayer(fileObj) {
@@ -245,7 +251,7 @@ function updateLayer(fileObj) {
             selectLayers(fileObj.prep + "Holder");
             selectAllPixels();
             PlacePSD(fileObj.path);
-            renameLayerFromTo(null, layerName);
+            renameCurrentLayerTo(layerName);
             opacityToPercent(fileObj.opacity, layerName);
             showLayers(layerName);
             if (fileObj.prep == "top") {
