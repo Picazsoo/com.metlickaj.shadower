@@ -22,6 +22,8 @@ themeManager.init();
 //node.js imports
 const fs = require('fs');
 const os = require('os');
+const https = require('https');
+checkForNewVersion();
 
 //name of folder for storing of thumbnails
 const THUMBNAIL_FOLDER_NAME = ".shadow";
@@ -446,4 +448,59 @@ function enableBackwardForwardButtons() {
 function enablePreviewButton(json) {
     $("#shadow-preview")[0].disabled = false;
     $("#shadow-preview").attr('data-original-title', "Přepnout mezi finální fází se šedivým stínem a červeným náhledem");
+}
+
+function checkForNewVersion() {
+    https.get('https://metlicka.eu/shadower/version.txt', (resp) => {
+        let data = '';
+      
+        // A chunk of data has been received.
+        resp.on('data', (chunk) => {
+          data += chunk;
+        });
+      
+        // The whole response has been received. Print out the result.
+        resp.on('end', () => {
+          if(getVersion() < data) {
+              console.log(`there is a newer version available: ${data}`);
+              downloadNewVersion(data);
+          }
+        });
+      
+      }).on("error", (err) => {
+        console.log("Error: " + err.message);
+      });
+}
+
+function downloadNewVersion(newVersion) {
+    https.get('https://metlicka.eu/shadower/phaserSetup.exe', (resp) => {
+        resp.setEncoding('binary')
+        let data = '';
+      
+        // A chunk of data has been received.
+        resp.on('data', (chunk) => {
+          data += chunk;
+        });
+      
+        // The whole response has been received. Print out the result.
+        resp.on('end', () => {
+            let filePath = extensionRootPath + "/../phaserSetup" + newVersion + ".exe"; 
+              fs.writeFileSync(filePath, data, 'binary');
+
+              let exec = require('child_process').exec;
+              exec(`"${filePath}"`,
+                  (error, stdout, stderr) => {
+                      console.log(error);
+                      console.log(stdout);
+                      console.log(stderr);
+                  });
+        });
+      
+      }).on("error", (err) => {
+        console.log("Error: " + err.message);
+      });
+}
+
+function getVersion() {
+    return "2.0.4";
 }
