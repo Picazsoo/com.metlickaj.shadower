@@ -65,8 +65,9 @@ function shadowFromCurrentPreviousAndPinned(obj) {
         var widthPx = obj.dimensionsInPx.widthPx;
         var heightPx = obj.dimensionsInPx.heightPx;
         var shadowDocumentName = obj.shadowDocumentName;
+
         //definitely obtain the shadow document (either find it or create it and find it)
-        var shadowDocument = getDocumentAtAllCosts(obj);
+        var shadowDocument = getOrCreateShadowingDocument(obj);
         app.activeDocument = shadowDocument;
         //set brush to black!!!
         resetSwatches()
@@ -125,8 +126,9 @@ function shadowFromCurrentPreviousAndPinned(obj) {
         alert(error);
     }
 }
+
 //this is a nested function - to be able to access variables of the parent function.
-function getDocumentAtAllCosts(payLoadObj) {
+function getOrCreateShadowingDocument(payLoadObj) {
     var documentName = payLoadObj.shadowDocumentName;
     var widthPx = payLoadObj.dimensionsInPx.widthPx;
     var heightPx = payLoadObj.dimensionsInPx.heightPx;
@@ -136,30 +138,35 @@ function getDocumentAtAllCosts(payLoadObj) {
     } catch (err) {
         //throw down flag
         alreadyInited = false;
-        createNewDocument(documentName, widthPx, heightPx, 300);
-        document = app.documents.getByName(documentName);
-        var layerRef = document.artLayers.add();
-        layerRef.name = payLoadObj.pinnedFile.prep + "Holder";
-        layerRef.allLocked = true;
-        layerRef = document.artLayers.add();
-        layerRef.name = payLoadObj.previousFile.prep + "Holder";
-        layerRef.allLocked = true;
-        layerRef = document.artLayers.add();
-        layerRef.name = payLoadObj.currentFile.prep + "Holder";
-        layerRef.allLocked = true;
-        layerRef = document.artLayers.add();
-        layerRef.name = "shadowHolder";
-        layerRef.allLocked = true;
-        layerRef = document.artLayers.add();
-        layerRef.name = "eSTIN";
-        layerRef.opacity = 30;
-        layerRef.allLocked = false;
-        setColorOverlay(rgbColorFactory(0, 0, 0), 100, layerRef.name);
-        createLayerComp("real-shadows-30", "standardni stiny a svetla");
-        layerRef.opacity = 60;
-        setColorOverlay(rgbColorFactory(255, 0, 0), 100, layerRef.name);
-        createLayerComp("edit-shadows-60", "stiny a svetla pro upravy");
+        document = createShadowingDocument(documentName, widthPx, heightPx, payLoadObj);
     }
+    return document;
+}
+
+function createShadowingDocument(documentName, widthPx, heightPx, payLoadObj) {
+    createNewDocument(documentName, widthPx, heightPx, 300);
+    var document = app.documents.getByName(documentName);
+    var layerRef = document.artLayers.add();
+    layerRef.name = payLoadObj.pinnedFile.prep + "Holder";
+    layerRef.allLocked = true;
+    layerRef = document.artLayers.add();
+    layerRef.name = payLoadObj.previousFile.prep + "Holder";
+    layerRef.allLocked = true;
+    layerRef = document.artLayers.add();
+    layerRef.name = payLoadObj.currentFile.prep + "Holder";
+    layerRef.allLocked = true;
+    layerRef = document.artLayers.add();
+    layerRef.name = "shadowHolder";
+    layerRef.allLocked = true;
+    layerRef = document.artLayers.add();
+    layerRef.name = "eSTIN";
+    layerRef.opacity = 30;
+    layerRef.allLocked = false;
+    setColorOverlay(rgbColorFactory(0, 0, 0), 100, layerRef.name);
+    createLayerComp("real-shadows-30", "standardni stiny a svetla");
+    layerRef.opacity = 60;
+    setColorOverlay(rgbColorFactory(255, 0, 0), 100, layerRef.name);
+    createLayerComp("edit-shadows-60", "stiny a svetla pro upravy");
     return document;
 }
 
