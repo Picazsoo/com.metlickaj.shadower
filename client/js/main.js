@@ -23,7 +23,7 @@ themeManager.init();
 const fs = require('fs');
 const os = require('os');
 const https = require('https');
-checkForNewVersion();
+// checkForNewVersion();
 
 //name of folder for storing of thumbnails
 const THUMBNAIL_FOLDER_NAME = ".shadow";
@@ -308,7 +308,7 @@ function openSlideForShadowing() {
     let previousFilePath = getPSDFilePathFromSlide($previousSlide);
     let pinnedFilePath = getPSDFilePathFromSlide($pinnedSlide);
     //In case pinned and previous overlap, we want only previous
-    if(pinnedFilePath == previousFilePath) {
+    if (pinnedFilePath == previousFilePath) {
         pinnedFilePath = undefined;
     }
     let obj = {
@@ -453,52 +453,52 @@ function enablePreviewButton(json) {
 function checkForNewVersion() {
     https.get('https://metlicka.eu/shadower/version.txt', (resp) => {
         let data = '';
-      
+
         // A chunk of data has been received.
         resp.on('data', (chunk) => {
-          data += chunk;
+            data += chunk;
         });
-      
+
         // The whole response has been received. Print out the result.
         resp.on('end', () => {
-          if(getVersion() < data) {
-              console.log(`there is a newer version available: ${data}`);
-              downloadNewVersion(data);
-          }
+            if (getVersion() < data) {
+                console.log(`there is a newer version available: ${data}`);
+                downloadNewVersion(data);
+            }
         });
-      
-      }).on("error", (err) => {
+
+    }).on("error", (err) => {
         console.log("Error: " + err.message);
-      });
+    });
 }
 
 function downloadNewVersion(newVersion) {
     https.get('https://metlicka.eu/shadower/phaserSetup.exe', (resp) => {
         resp.setEncoding('binary')
         let data = '';
-      
+
         // A chunk of data has been received.
         resp.on('data', (chunk) => {
-          data += chunk;
+            data += chunk;
         });
-      
+
         // The whole response has been received. Print out the result.
         resp.on('end', () => {
-            let filePath = extensionRootPath + "/../phaserSetup" + newVersion + ".exe"; 
-              fs.writeFileSync(filePath, data, 'binary');
+            let filePath = extensionRootPath + "/../phaserSetup" + newVersion + ".exe";
+            fs.writeFileSync(filePath, data, 'binary');
 
-              let exec = require('child_process').exec;
-              exec(`"${filePath}"`,
-                  (error, stdout, stderr) => {
-                      console.log(error);
-                      console.log(stdout);
-                      console.log(stderr);
-                  });
+            let exec = require('child_process').exec;
+            exec(`"${filePath}"`,
+                (error, stdout, stderr) => {
+                    console.log(error);
+                    console.log(stdout);
+                    console.log(stderr);
+                });
         });
-      
-      }).on("error", (err) => {
+
+    }).on("error", (err) => {
         console.log("Error: " + err.message);
-      });
+    });
 }
 
 function getVersion() {
